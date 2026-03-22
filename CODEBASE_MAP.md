@@ -1,25 +1,29 @@
-<!-- Last verified: 2026-03-14 by /codebase-mirror -->
+<!-- Last verified: 2026-03-21 by /codebase-mirror -->
 
 # WARD (Write-once Append-only Receipt Digests) — Codebase Map
 
 ## Metrics
+
 | Metric | Count |
 |--------|-------|
-| Files | 17 |
-| Schema Files | 5 |
-| IETF Draft | Pending (draft-cowles-ward-00) |
+| Spec file | 1 (SPEC.md) |
+| Schemas | 4 (ward-entry, ward-chain, ward-tip, ward-verification-result) |
+| Supporting docs | 8 |
+
+## Summary
+
+WARD provides tamper-evident receipt chains for agent operations. Hash-linked, append-only structure ensures operations cannot be retroactively altered.
 
 ## Key Files
-| File | Purpose |
-|------|---------|
-| SPEC.md | Normative spec |
-| CHAIN_STRUCTURE.md | Chain scoping, storage, lifecycle |
-| VERIFICATION.md | Verifier algorithm |
-| INTEGRATION.md | AEE/AOCL/VOLT integration |
-| THREAT_MODEL.md | Threat model |
 
-## Schemas
-ward-entry.schema.json, ward-tip.schema.json, ward-chain.schema.json, ward-verification-result.schema.json, AI_README.json
-
-## Status
-Protocol v0.1 (draft) — IETF NOT yet submitted — MIT
+- SPEC.md — Full specification
+- schemas/ward-entry.schema.json
+- schemas/ward-chain.schema.json
+- schemas/ward-tip.schema.json
+- schemas/ward-verification-result.schema.json
+- CHAIN_STRUCTURE.md — Chain structure details
+- VERIFICATION.md — Verification procedures
+- WORKED_EXAMPLES.md — Worked examples
+- THREAT_MODEL.md — Threat analysis
+- INTEGRATION.md — Integration guide
+- SECURITY.md — Security considerations
