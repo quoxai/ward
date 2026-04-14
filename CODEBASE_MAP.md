@@ -1,4 +1,4 @@
-<!-- Last verified: 2026-04-13T00:30:00Z by /codebase-mirror -->
+<!-- Last verified: 2026-04-14 by /codebase-mirror -->
 
 # WARD (Write-once Append-only Receipt Digests) — Codebase Map
 
@@ -55,7 +55,7 @@ ward/
 ├── SECURITY.md             # Vulnerability reporting policy
 ├── CONTRIBUTING.md         # Contribution guidelines
 ├── CHANGELOG.md            # Version history
-├── LICENSE                 # License file
+├── LICENSE                 # Apache 2.0
 ├── AI_README.json          # Machine-readable protocol explainer (AEE envelope format)
 ├── CODEBASE_MAP.md         # This file
 ├── schemas/
