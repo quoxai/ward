@@ -1,4 +1,4 @@
-<!-- Last verified: 2026-05-14T21:30:00Z by /codebase-mirror -->
+<!-- Last verified: 2026-05-18T13:30:00Z by /codebase-mirror -->
 
 # ward — Codebase Map
 
