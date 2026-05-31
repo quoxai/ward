@@ -1,4 +1,4 @@
-<!-- Last verified: 2026-05-18T13:30:00Z by /codebase-mirror -->
+<!-- Last verified: 2026-05-31T09:30:00Z by /codebase-mirror -->
 
 # ward — Codebase Map
 
@@ -29,7 +29,7 @@ WARD observes and receipts — it does not record payloads.
 - **Protocol:** WARD v0.1 (draft)
 - **Initial Release:** 2026-03-05
 - **Schemas:** v0.1
-- **License:** MIT
+- **License:** Apache 2.0
 
 ## Core Concepts
 
@@ -86,15 +86,16 @@ ward/
 ├── CONTRIBUTING.md             # Contribution guidelines
 ├── CHANGELOG.md                # Version history
 ├── AI_README.json              # Machine-readable summary (valid AEE envelope)
-├── LICENSE                     # MIT
+├── CODEBASE_MAP.md             # This file
+├── LICENSE                     # Apache 2.0
 ├── schemas/
 │   ├── ward-entry.schema.json              # Entry schema (11 req + 3 opt)
 │   ├── ward-chain.schema.json              # Chain descriptor (7 req)
 │   ├── ward-tip.schema.json                # Tip/checkpoint (6 req + 4 opt)
 │   └── ward-verification-result.schema.json # Verifier output
 └── examples/
-    ├── single-chain/           # (placeholder — .gitkeep only)
-    └── meta-chain/             # (placeholder — .gitkeep only)
+    ├── single-chain/           # Placeholder (.gitkeep only)
+    └── meta-chain/             # Placeholder (.gitkeep only)
 ```
 
 ## JSON Schemas (v0.1)
