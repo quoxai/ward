@@ -7,6 +7,14 @@ This project follows a pragmatic versioning approach:
 - **Minor**: backwards-compatible additions
 - **Major**: breaking changes
 
+## [Unreleased]
+
+### Errata
+- `WORKED_EXAMPLES.md` contained several hash values that were not valid 64-char lowercase hex (a 63-char genesis hash reused across Example 1, a 63-char `payload_hash` in Example 2 Entry 3, and a `tip_chain_hash` in Example 3 with non-hex characters). Fixed:
+  - Example 1's genesis hash for `ward:org/quox/env/production` is fully specified (`SHA-256("WARD-GENESIS|" + chain_id)` per §4.3) and has been recomputed correctly; the corrected value now appears consistently in Step 1, Step 2's `prev_chain_hash`, and the Step 3 `chain_hash` input string.
+  - Example 2 Entry 3's `payload_hash` and Example 3's staging tip `tip_chain_hash` reference payloads not reproduced verbatim in this doc, so they remain illustrative placeholder values; they are now valid 64-char hex and explicitly labelled illustrative.
+- No normative behavior change; this is a documentation-only patch (no `ward_version` bump required per §16.2).
+
 ## [0.1.0] — 2026-03-05
 
 ### Added

@@ -21,16 +21,14 @@ An AEE envelope is delivered and persisted. WARD witnesses it as the first entry
 
 ```
 Input:  "WARD-GENESIS|ward:org/quox/env/production"
-Output: SHA-256 = e3f1a8b2c4d6e8f0a1b3c5d7e9f0a2b4c6d8e0f1a3b5c7d9e1f0a2b4c6d8e0f1
+Output: SHA-256 = 4228bb654b660969b96b84d502e1615de0ac7bffaeb37c52a7007b310127f481
 ```
 
 > Note: This is the actual SHA-256 of the UTF-8 string `WARD-GENESIS|ward:org/quox/env/production`. In production, compute this with your SHA-256 library.
 
-For this example, we'll use a simplified hash notation. The real value is:
-
 ```
 genesis_hash = SHA-256("WARD-GENESIS|ward:org/quox/env/production")
-             = 7a4f8e2b1c3d5a6f9e0b2d4c6a8f1e3d5b7c9a0e2f4d6b8a1c3e5f7d9b0a2c4
+             = 4228bb654b660969b96b84d502e1615de0ac7bffaeb37c52a7007b310127f481
 ```
 
 ### Step 2: Create ward entry (seq=1)
@@ -45,7 +43,7 @@ genesis_hash = SHA-256("WARD-GENESIS|ward:org/quox/env/production")
   "source_kind": "AEE",
   "source_id": "aee-env-550e8400",
   "payload_hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
-  "prev_chain_hash": "7a4f8e2b1c3d5a6f9e0b2d4c6a8f1e3d5b7c9a0e2f4d6b8a1c3e5f7d9b0a2c4",
+  "prev_chain_hash": "4228bb654b660969b96b84d502e1615de0ac7bffaeb37c52a7007b310127f481",
   "chain_hash": "<computed below>",
   "issuer_id": "ward-issuer-prod-01"
 }
@@ -55,7 +53,7 @@ genesis_hash = SHA-256("WARD-GENESIS|ward:org/quox/env/production")
 
 Input string (pipe-separated):
 ```
-7a4f8e2b1c3d5a6f9e0b2d4c6a8f1e3d5b7c9a0e2f4d6b8a1c3e5f7d9b0a2c4|ward:org/quox/env/production|1|01WARD-E001|2026-03-05T14:30:00.000Z|AEE|aee-env-550e8400|a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
+4228bb654b660969b96b84d502e1615de0ac7bffaeb37c52a7007b310127f481|ward:org/quox/env/production|1|01WARD-E001|2026-03-05T14:30:00.000Z|AEE|aee-env-550e8400|a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2
 ```
 
 ```
@@ -136,12 +134,14 @@ genesis_hash: SHA-256("WARD-GENESIS|ward:org/quox/env/staging")
   "witnessed_at": "2026-03-05T15:00:05.000Z",
   "source_kind": "VOLT",
   "source_id": "volt-bundle-003",
-  "payload_hash": "ffff9999eeee8888dddd7777cccc6666bbbb5555aaaa4444999933338888222",
+  "payload_hash": "ffff9999eeee8888dddd7777cccc6666bbbb5555aaaa44449999333388882222",
   "prev_chain_hash": "<hash_2>",
   "chain_hash": "<hash_3>",
   "issuer_id": "ward-issuer-stg-01"
 }
 ```
+
+> Illustrative value: `payload_hash` here is a placeholder pattern, not a hash computed over bytes shown in this doc (the VOLT bundle content for `volt-bundle-003` isn't reproduced here). Compute the real value from your actual canonical VOLT bundle JSON.
 
 ### Verification walkthrough
 
@@ -210,13 +210,15 @@ Two sub-chains (production and staging) create tips. A meta-chain witnesses both
   "tip_id": "tip-stg-001",
   "chain_id": "ward:org/quox/env/staging",
   "tip_seq": 200,
-  "tip_chain_hash": "5678efgh5678efgh5678efgh5678efgh5678efgh5678efgh5678efgh5678efgh",
+  "tip_chain_hash": "5678cdef5678cdef5678cdef5678cdef5678cdef5678cdef5678cdef5678cdef",
   "entry_count": 200,
   "created_at": "2026-03-05T16:00:01.000Z",
   "sig": "MEUCIQDy...<base64 Ed25519 signature>...",
   "key_id": "did:key:z6Mkn...stg"
 }
 ```
+
+> Illustrative values: the `tip_chain_hash` fields above are placeholder patterns, not hashes computed from a real 500/200-entry chain (that underlying chain state isn't reproduced in this doc). Compute real values by hashing your actual chain entries per §4.4.
 
 ### Meta-chain entries
 
