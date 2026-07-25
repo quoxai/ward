@@ -121,6 +121,17 @@ See: [SPEC.md](SPEC.md), [CHAIN_STRUCTURE.md](CHAIN_STRUCTURE.md), [VERIFICATION
 
 ---
 
+## Reference SDK
+
+A conformant reference implementation of WARD v0.1 exists:
+
+- **`@quox/ward`** (TypeScript / Node, zero runtime dependencies), at **github.com/quoxai/ward-sdk**.
+- Chain math (SPEC section 4), the full VERIFICATION.md algorithm with per-tamper reason codes, Ed25519 tip signing, external anchoring, and a `ward-verify` CLI. Conformance fixtures reproduce the WORKED_EXAMPLES.md chains, and external hash vectors are recomputed independently of the SDK's own writer.
+
+The SDK repo is private today and **opening at launch**, together with the npm publish. Until then the reference above is a name, not a live link.
+
+---
+
 ## Related Protocols
 
 | Protocol | Role | Repo |
