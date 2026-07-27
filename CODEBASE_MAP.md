@@ -1,6 +1,6 @@
 # WARD — Codebase Map
 
-> **Regenerated:** 2026-07-27
+> **Regenerated:** 2026-07-27 15:30 UTC
 > **Protocol Version:** 0.1 (draft)
 
 ## Overview
