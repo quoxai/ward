@@ -1,6 +1,6 @@
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-08-11 09:15 UTC
+> **Regenerated:** 2026-08-11 12:27 UTC
 > **Protocol Version:** 0.1 (draft)
 
 ## Overview
@@ -45,7 +45,7 @@ ward/
 │   ├── ward-entry.schema.json              # Entry (11 required + 3 optional)
 │   ├── ward-chain.schema.json              # Chain descriptor (7 required)
 │   ├── ward-tip.schema.json                # Tip/checkpoint (6 required + 4 optional)
-│   └── ward-verification-result.schema.json # Verifier output
+│   └── ward-verification-result.schema.json # Verifier output (oneOf on status)
 └── examples/
     ├── single-chain/.gitkeep
     └── meta-chain/.gitkeep
@@ -152,6 +152,8 @@ WARD (content-free witnessing + hash chain + tips)  ← THIS PROTOCOL
 | `notes` | string | _(optional)_ Human-readable annotation |
 
 ### ward_verification_result
+
+Discriminated union (`oneOf` on `status`); only `status` is required.
 
 | Status | Meaning |
 |--------|---------|
@@ -346,7 +348,7 @@ No double-witnessing within a chain.
 ## Recent Changes
 
 ### 2026-08-11
-- Regenerated CODEBASE_MAP.md (no spec changes since 2026-07-27)
+- Regenerated CODEBASE_MAP.md (no spec changes since 2026-08-04 errata commit)
 
 ### 2026-07-25
 - **QSDK-WARD:** Fixed WORKED_EXAMPLES.md hash errata (63-char payload_hash in E3, non-hex tip_chain_hash); documentation-only patch, no `ward_version` bump
