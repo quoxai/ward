@@ -1,11 +1,11 @@
-# WARD — Codebase Map
+# WARD: Codebase Map
 
-> **Regenerated:** 2026-07-27 15:30 UTC
+> **Regenerated:** 2026-08-11 09:15 UTC
 > **Protocol Version:** 0.1 (draft)
 
 ## Overview
 
-**WARD — Write-once Append-only Receipt Digests.** A content-free hash-chain witnessing protocol with tips, meta-chains, and optional Ed25519 signing. Produces tamper-evident receipts over AEE / AOCL / VOLT events without storing event content. Part of the Quox protocol family. Specification only, no runtime code in this repo.
+**WARD (Write-once Append-only Receipt Digests)** is a content-free hash-chain witnessing protocol with tips, meta-chains, and optional Ed25519 signing. It produces tamper-evident receipts over AEE / AOCL / VOLT events without storing event content. Part of the Quox protocol family. Specification only, no runtime code in this repo.
 
 ---
 
@@ -16,6 +16,7 @@
 | Protocol Version | **0.1** (`ward_version: "0.1"`) |
 | Schema files | 4 |
 | Spec docs (Markdown) | 11 |
+| SPEC.md sections | 19 |
 | Example dirs | 2 (stubs, `.gitkeep` only) |
 | Total files | 20 (excluding .git) |
 | License | Apache 2.0 |
@@ -36,7 +37,7 @@ ward/
 ├── ROADMAP.md                # v0.2+ features and explicit non-goals
 ├── SECURITY.md               # Vulnerability reporting policy
 ├── CONTRIBUTING.md           # Contribution guidelines
-├── CHANGELOG.md              # Version history
+├── CHANGELOG.md              # Version history (0.1.0 + unreleased errata)
 ├── LICENSE                   # Apache 2.0
 ├── AI_README.json            # Machine-readable summary (valid AEE envelope)
 ├── CODEBASE_MAP.md           # This file
@@ -49,6 +50,8 @@ ward/
     ├── single-chain/.gitkeep
     └── meta-chain/.gitkeep
 ```
+
+There are no entry points, routes, registries, or tests: this repo is a protocol specification. The authoritative "code" is `SPEC.md` plus the four JSON Schemas.
 
 ---
 
@@ -93,10 +96,10 @@ WARD (content-free witnessing + hash chain + tips)  ← THIS PROTOCOL
 
 | Protocol | Role | Repo |
 |----------|------|------|
-| **AEE** | Agent Envelope Exchange — message format + correlation | github.com/quoxai/aee |
-| **AOCL** | Agent Orchestration Control Layers — policy + HITL gates | github.com/quoxai/aocl |
-| **VOLT** | Verifiable Operations Ledger & Trace — evidence + bundles | github.com/quoxai/volt |
-| **WARD** | Write-once Append-only Receipt Digests — witnessing + hash chains | (this repo) |
+| **AEE** | Agent Envelope Exchange: message format + correlation | github.com/quoxai/aee |
+| **AOCL** | Agent Orchestration Control Layers: policy + HITL gates | github.com/quoxai/aocl |
+| **VOLT** | Verifiable Operations Ledger & Trace: evidence + bundles | github.com/quoxai/volt |
+| **WARD** | Write-once Append-only Receipt Digests: witnessing + hash chains | (this repo) |
 
 ---
 
@@ -152,8 +155,8 @@ WARD (content-free witnessing + hash chain + tips)  ← THIS PROTOCOL
 
 | Status | Meaning |
 |--------|---------|
-| `INTACT` | Chain verified — all hashes, linkage, ordering, tips correct |
-| `BROKEN` | Verification failed — at least one check failed |
+| `INTACT` | Chain verified: all hashes, linkage, ordering, tips correct |
+| `BROKEN` | Verification failed: at least one check failed |
 | `PARTIAL` | Chain valid to a point, but incomplete |
 
 ---
@@ -180,11 +183,11 @@ All hashes: **SHA-256, lowercase hex, 64 characters**.
 
 ## Verification Algorithm (5 steps)
 
-1. **Validate genesis** — `prev_chain_hash` of seq=1 must equal computed `genesis_hash`
-2. **Validate chain hashes** — recompute each `chain_hash` and compare
-3. **Validate chain linkage** — each `prev_chain_hash` must match prior `chain_hash`
-4. **Validate ordering/uniqueness** — seq monotonic from 1, no duplicate sources
-5. **Validate tips** — `tip_chain_hash` matches entry at `tip_seq`, verify signatures
+1. **Validate genesis**: `prev_chain_hash` of seq=1 must equal computed `genesis_hash`
+2. **Validate chain hashes**: recompute each `chain_hash` and compare
+3. **Validate chain linkage**: each `prev_chain_hash` must match prior `chain_hash`
+4. **Validate ordering/uniqueness**: seq monotonic from 1, no duplicate sources
+5. **Validate tips**: `tip_chain_hash` matches entry at `tip_seq`, verify signatures
 
 ### Failure Codes
 
@@ -218,9 +221,9 @@ All hashes: **SHA-256, lowercase hex, 64 characters**.
 ## Integration Patterns
 
 ### Deployment Options
-1. **Sidecar** (recommended) — separate process, local IPC
-2. **Middleware hook** — embedded async hooks in main app
-3. **Batch scanner** — periodic scan of source event stores
+1. **Sidecar** (recommended): separate process, local IPC
+2. **Middleware hook**: embedded async hooks in main app
+3. **Batch scanner**: periodic scan of source event stores
 
 ### What to Witness
 
@@ -242,7 +245,7 @@ No double-witnessing within a chain.
 
 ## Threat Model Summary
 
-### What WARD Mitigates (T1–T5)
+### What WARD Mitigates (T1-T5)
 
 | Threat | Detection |
 |--------|-----------|
@@ -252,7 +255,7 @@ No double-witnessing within a chain.
 | Backdating | External sink timestamps |
 | Double-witnessing | Uniqueness constraint |
 
-### What WARD Cannot Fully Mitigate (T6–T8)
+### What WARD Cannot Fully Mitigate (T6-T8)
 
 | Threat | Mitigation |
 |--------|------------|
@@ -300,7 +303,7 @@ No double-witnessing within a chain.
 
 | Version | Focus |
 |---------|-------|
-| **v0.1** (current) | Witnessing substrate — entries, chains, tips, meta-chains, verification |
+| **v0.1** (current) | Witnessing substrate: entries, chains, tips, meta-chains, verification |
 | **v0.2** | Multi-sink tips, sink health monitoring |
 | **v0.3** | Federation, cross-deployment witnessing |
 | **v0.4** | Hardware signing (HSM/TPM) |
@@ -318,10 +321,10 @@ No double-witnessing within a chain.
 
 ## Key Design Constraints
 
-1. **Content-free** — never stores event payloads (non-negotiable)
-2. **One-way observation** — witnessing must not block/delay source pipelines
-3. **Deterministic** — all hashes reproducible from inputs
-4. **Minimal schema** — forward-compatible, unknown fields ignored
+1. **Content-free**: never stores event payloads (non-negotiable)
+2. **One-way observation**: witnessing must not block/delay source pipelines
+3. **Deterministic**: all hashes reproducible from inputs
+4. **Minimal schema**: forward-compatible, unknown fields ignored
 
 ---
 
@@ -342,12 +345,12 @@ No double-witnessing within a chain.
 
 ## Recent Changes
 
-### 2026-07-27
-- Regenerated CODEBASE_MAP.md
+### 2026-08-11
+- Regenerated CODEBASE_MAP.md (no spec changes since 2026-07-27)
 
 ### 2026-07-25
-- **QSDK-WARD:** Fixed WORKED_EXAMPLES.md hash errata (63-char payload_hash in E3, non-hex tip_chain_hash)
-- Reference SDK (`@quox/ward`) documented; private repo opens at launch
+- **QSDK-WARD:** Fixed WORKED_EXAMPLES.md hash errata (63-char payload_hash in E3, non-hex tip_chain_hash); documentation-only patch, no `ward_version` bump
+- **QSDK:** Reference SDK (`@quox/ward`) documented in README; private repo opens at launch
 
 ### 2026-03-05
 - Initial WARD v0.1 protocol specification published
