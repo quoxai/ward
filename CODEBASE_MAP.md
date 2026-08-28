@@ -1,6 +1,6 @@
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-08-13 UTC
+> **Regenerated:** 2026-08-28 UTC
 > **Protocol Version:** 0.1 (draft)
 
 ## Overview
@@ -347,8 +347,8 @@ No double-witnessing within a chain.
 
 ## Recent Changes
 
-### 2026-08-13
-- Regenerated CODEBASE_MAP.md; schema field counts (entry 11+3, chain 7, tip 6+4), verification statuses/failure codes, hash formulas and file totals re-verified against `schemas/*.json` and SPEC.md. No spec changes since the 2026-08-04 errata commit.
+### 2026-08-28
+- Regenerated CODEBASE_MAP.md; schema field counts (entry 11+3, chain 7, tip 6+4), verification statuses/failure codes, hash formulas, SPEC section count (19) and file totals (20) re-verified against `schemas/*.json`, SPEC.md and CHANGELOG.md. No spec changes since the 2026-08-04 errata commit.
 
 ### 2026-07-25
 - **QSDK-WARD:** Fixed WORKED_EXAMPLES.md hash errata (63-char payload_hash in E3, non-hex tip_chain_hash); documentation-only patch, no `ward_version` bump
