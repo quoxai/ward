@@ -4,6 +4,13 @@ WARD is Quox's **witnessing layer**.
 
 It produces **tamper-evident, content-free hash-chain receipts** over events from AEE, AOCL, and VOLT, proving that specific events existed at specific points in time, without storing any event content.
 
+## The short version
+
+- **What:** a notary for the evidence itself: content-free receipts proving events existed at a point in time.
+- **Who:** operators who need tamper-evidence to hold even if the host that produced the evidence is compromised.
+- **Why:** any log, even a hash-chained one, can be rewritten by whoever controls the machine it lives on.
+- **How:** a separate chain witnesses each event by ID and hash only, and signed checkpoints published to external stores make rewrites detectable.
+
 If **AEE** is how agents communicate, **AOCL** is how they're controlled, **VOLT** is how you prove what happened, then **WARD** is how you prove **the proof hasn't been tampered with**.
 
 ---
