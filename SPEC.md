@@ -222,9 +222,15 @@ Constraints:
 
 ## 6. ward_entry schema (v0.2)
 
-A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields:
+A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields.
 
-### 6.1 Required fields
+The two groups differ in trust, not just in cardinality: every required field
+except `chain_hash` is **COMMITTED** (inside the hash body, §4.4), so the
+chain proves it. Every optional field is an **UNCOMMITTED ANNOTATION**: it can
+be altered later without breaking any hash, and no claim of the form "WARD
+says this event was tagged X" is ever valid.
+
+### 6.1 Required fields (COMMITTED, except `chain_hash` itself)
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -240,7 +246,7 @@ A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields:
 | `chain_hash` | string | this entry's computed chain hash (see §4.4) |
 | `issuer_id` | string | identifier of the WARD instance that created this entry |
 
-### 6.2 Optional fields
+### 6.2 Optional fields (UNCOMMITTED ANNOTATIONS)
 
 | Field | Type | Notes |
 |-------|------|-------|
@@ -408,13 +414,24 @@ Tips **SHOULD** be signed with Ed25519. The signature is over the raw bytes of t
 
 ### 12.3 Tip sinks
 
-Tips **MAY** be published to external append-only stores:
+Tips **MAY** be published to external stores. Sinks differ in what they
+actually guarantee, and a deployment **SHOULD** document which property each
+configured sink provides:
 
-- **Gitea signed tags** (primary recommended sink): create a signed tag referencing `tip_chain_hash`.
-- **S3 Object Lock**: write tip as a locked object.
-- **Append-only log services**: any service that prevents modification after write.
+- **Git signed tags** (e.g. Gitea): replication plus a signature. An
+  administrator with repository access can delete or replace tags; this sink
+  protects against attackers without that access.
+- **S3 Object Lock** (compliance mode): immutable retention for the
+  configured period.
+- **RFC 3161 timestamp authorities**: trusted time from a third party.
+- **Transparency services**: append-only logs with third-party
+  observability, such as services implementing the SCITT architecture
+  (RFC 9943) or public artifact transparency logs. Defining a WARD tip
+  binding for these is roadmap work (ROADMAP.md v0.3, Anchoring).
 
-The `sink_ref` field records where the tip was published.
+The `sink_ref` field records where the tip was published. Absence of an
+expected tip at its `sink_ref` is itself evidence and **SHOULD** be treated
+as a verification warning, not silently ignored.
 
 ---
 

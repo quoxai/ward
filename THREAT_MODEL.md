@@ -20,7 +20,7 @@ WARD v0.2 aims to provide:
    - Never store or expose source event content, only hashes and references.
 
 4. **External anchoring** (via tips)
-   - Publish chain state to append-only sinks where it cannot be retroactively modified.
+   - Publish chain state to external sinks whose strength (replication, immutable retention, trusted time, transparency) the deployment chooses and documents.
 
 5. **Cross-chain integrity** (via meta-chains)
    - Prove that multiple sub-chains existed at a point in time.
@@ -124,14 +124,14 @@ Each boundary is a place where tampering, substitution, or denial may be attempt
 
 ---
 
-## 6) Threats WARD does NOT fully mitigate (T6–T8)
+## 6) Threats WARD does NOT fully mitigate (T6–T10)
 
 ### T6: Compromised issuer (chain rewrite)
 
 **Attack:** Attacker controls the WARD issuer and rewrites the entire chain with consistent hashes, or presents an alternative branch (fork) built from the same predecessor entry while withholding the original branch.
 **Why WARD can't solve alone:** The issuer is the trusted entity that creates entries and computes hashes. If compromised, it can produce a "valid" but false chain, and a verifier shown only one branch cannot detect the fork from chain data alone.
 **Mitigations:**
-- **Signed tips published to external sinks**: the attacker cannot modify tips already in Gitea signed tags or S3 Object Lock. Verification will detect the mismatch.
+- **Signed tips published to external sinks**: sinks differ in strength, and deployments must know which property they are buying. A Git signed tag is replication plus a signature: an administrator with repository access can delete or replace tags, so it protects against attackers without that access, and deletion is detectable only by a verifier who already knows the tip existed. S3 Object Lock in compliance mode provides genuine immutable retention for its configured period. An RFC 3161 timestamp or a transparency log adds trusted time and third-party observability. Verification against any sink detects substitution; absence of an expected tip is itself evidence.
 - **Meta-chains**: if a meta-chain witnessed the original tips, the rewrite is detectable.
 - **Multiple independent WARD issuers**: different issuers witnessing the same events create redundancy.
 - **Periodic external audits**: compare chain state against external records.
@@ -176,6 +176,21 @@ Related caveat: OPTIONAL fields (`source_ts`, `tags`, `sig`) are outside the
 hash body in both schemes. They are annotations, not commitments: a party
 relying on them for anything security-relevant is out of contract.
 
+### T10 — Confirmation attacks on low-entropy content (accepted, documented)
+
+Content-free does not mean information-free. A `payload_hash` is an unsalted
+commitment: if an attacker can enumerate the plausible source contents (for
+example a decision field whose only values are approved, denied, or pending),
+they can hash each candidate and confirm which one was witnessed. WARD never
+stores content, but payload hashes over low-entropy or predictable source
+events permit this confirmation attack by construction.
+
+**Mitigations:** treat the witnessed hash as public knowledge equivalent to
+"one of the enumerable candidates, confirmably which"; where that matters,
+callers SHOULD fold caller-held randomness or unpredictable identifiers into
+the canonical source content before hashing. A first-class blinded commitment
+profile is a candidate for a future revision.
+
 ---
 
 ## 7) Mitigations via meta-chain + external tips
@@ -200,7 +215,7 @@ An attacker would need to:
 - Compromise the WARD issuer
 - Rewrite all affected sub-chains
 - Replace Gitea signed tags (requires Gitea admin access)
-- Replace S3 Object Lock objects (not possible by design)
+- Replace S3 Object Lock objects (not possible in compliance mode within the retention period)
 - Rewrite the meta-chain consistently
 
 This is infeasible for a single attacker in a properly configured system.
