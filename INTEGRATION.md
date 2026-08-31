@@ -1,4 +1,4 @@
-# WARD Integration with AEE + AOCL + VOLT (v0.1)
+# WARD Integration with AEE + AOCL + VOLT (v0.2)
 
 This document explains **how WARD observes and witnesses events** from the other Quox protocols, and the deployment patterns for adding WARD to a system.
 

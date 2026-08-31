@@ -28,7 +28,7 @@ Everything else is additive.
 
 ## Version plan at a glance
 
-### v0.1 (now) — Witnessing substrate
+### v0.1 — Witnessing substrate
 
 - Ward entry schema (11 required + 3 optional fields)
 - Genesis hash and chain hash computation
@@ -38,21 +38,28 @@ Everything else is additive.
 - SQLite and PostgreSQL storage schemas
 - Verification algorithm with 7 failure codes
 
-### v0.2 — Multi-sink tips
+### v0.2 — Canonical-JSON hashing (SHIPPED 2026-08-31)
+
+- Chain hash computed over the canonical JSON of the entry hash body
+- Closes the v0.1 delimiter-injection ambiguity (THREAT_MODEL.md T9)
+- ward_version selects the hash scheme; v0.1 chains verify under Appendix A
+- Real, reproducible worked examples and examples/ fixtures (tools/gen-examples.mjs)
+
+### v0.3 — Multi-sink tips
 
 - Publish tips to multiple sinks simultaneously
 - Sink health monitoring and failover
 - Tip sync protocol between sinks
 - Conformance test vectors (golden chains)
 
-### v0.3 — Federation
+### v0.4 — Federation
 
 - Cross-deployment chain witnessing
 - Federated meta-chains (chain-of-meta-chains)
 - Trust delegation between WARD issuers
 - Discovery protocol for remote chains
 
-### v0.4 — Hardware signing
+### v0.5 — Hardware signing
 
 - HSM/TPM-backed Ed25519 keys for tip signing
 - Secure enclave attestations (where available)
@@ -68,7 +75,7 @@ Everything else is additive.
 
 ---
 
-## v0.2 — Multi-sink tips
+## v0.3 — Multi-sink tips
 
 ### Why
 
@@ -97,7 +104,7 @@ A single sink is a single point of trust. Publishing tips to multiple independen
 
 ---
 
-## v0.3 — Federation
+## v0.4 — Federation
 
 ### What federation means for WARD
 
@@ -118,7 +125,7 @@ Federation allows WARD chains from different deployments to witness each other's
 
 ---
 
-## v0.4 — Hardware signing
+## v0.5 — Hardware signing
 
 ### Goal
 

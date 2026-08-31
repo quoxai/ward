@@ -65,7 +65,7 @@ WARD (content-free witnessing + hash chain + tips)
 
 ---
 
-## Core features (v0.1)
+## Core features (v0.2)
 
 ### 1) Content-free witnessing
 Every witnessed event becomes a ward entry containing:
@@ -98,7 +98,9 @@ A verifier can check:
 
 ## Status
 
-- **Protocol Version:** WARD v0.1 (draft)
+- **Protocol Version:** WARD v0.2 (draft). v0.2 replaces the v0.1
+  delimiter-concatenation chain hash with canonical-JSON hashing (SPEC.md
+  §4.4); existing v0.1 chains stay verifiable under SPEC.md Appendix A.
 - **Scope:** witness + chain + verify
 - **Roadmap:** multi-sink tips, federation, hardware signing, stable v1.0
 
@@ -123,7 +125,7 @@ See: [SPEC.md](SPEC.md), [CHAIN_STRUCTURE.md](CHAIN_STRUCTURE.md), [VERIFICATION
 
 ## Reference SDK
 
-A conformant reference implementation of WARD v0.1 exists:
+A reference implementation exists (WARD v0.1 conformant; v0.2 hashing support in progress):
 
 - **`@quox/ward`** (TypeScript / Node, zero runtime dependencies), at **github.com/quoxai/ward-sdk**.
 - Chain math (SPEC section 4), the full VERIFICATION.md algorithm with per-tamper reason codes, Ed25519 tip signing, external anchoring, and a `ward-verify` CLI. Conformance fixtures reproduce the WORKED_EXAMPLES.md chains, and external hash vectors are recomputed independently of the SDK's own writer.

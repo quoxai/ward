@@ -7,7 +7,44 @@ This project follows a pragmatic versioning approach:
 - **Minor**: backwards-compatible additions
 - **Major**: breaking changes
 
-## [Unreleased]
+## [0.2.0] — 2026-08-31
+
+### Changed (breaking)
+- **Chain hash is now computed over the canonical JSON of the entry hash body**
+  (the 10 required fields excluding `chain_hash`; SPEC.md §4.4), replacing the
+  v0.1 pipe-separated concatenation. Rationale: the v0.1 scheme allowed
+  delimiter injection, since `ward_entry_id` and `source_id` carry no charset
+  restriction, a crafted value containing `|` could make two distinct field
+  tuples hash identically (THREAT_MODEL.md T9). JSON string escaping makes
+  field boundaries unambiguous for every input.
+- `issuer_id` and `ward_version` are now part of the hash input (they were not
+  in v0.1), so issuer attribution and the declared scheme are tamper-protected.
+- Verifiers select the hash scheme per entry from `ward_version` (SPEC.md
+  §16.1). The v0.1 formula moves to SPEC.md Appendix A: existing chains are
+  append-only, are never rehashed, and remain verifiable; new v0.1 entries are
+  rejected.
+- Genesis hash formula is unchanged (single-field input, no ambiguity).
+
+### Fixed
+- Versioning contradiction between §2.3 and §16.2: the change policy now
+  states the standard pre-1.0 convention (minor bumps MAY be breaking while
+  major is 0) in one place, and §2.3 defers to it. The duplicate §19 was
+  removed.
+- `INCOMPLETE_CHAIN` (used by PARTIAL results) is now listed in the
+  VERIFICATION.md §5 reason-code table, with a rule for how consumers treat
+  unknown codes.
+- `WORKED_EXAMPLES.md` rebuilt: every hash and signature in the document is
+  now real and reproducible with `node tools/gen-examples.mjs`, including the
+  source events behind every `payload_hash` and real Ed25519 tip signatures
+  from a documentation key with a published seed recipe. The previous
+  placeholder "Ed25519" signatures were byte-impossible (they carried a DER
+  ECDSA prefix).
+- `examples/single-chain/` and `examples/meta-chain/` now contain real
+  generated fixtures instead of only `.gitkeep`.
+- Chain IDs must not contain the reserved `::` sequence (SPEC.md §5.2), and
+  identifier charset hygiene is documented.
+
+## [Unreleased errata, folded into 0.2.0]
 
 ### Errata
 - `WORKED_EXAMPLES.md` contained several hash values that were not valid 64-char lowercase hex (a 63-char genesis hash reused across Example 1, a 63-char `payload_hash` in Example 2 Entry 3, and a `tip_chain_hash` in Example 3 with non-hex characters). Fixed:

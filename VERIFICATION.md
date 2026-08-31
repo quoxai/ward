@@ -1,4 +1,4 @@
-# WARD Verification (v0.1)
+# WARD Verification (v0.2)
 
 This document defines how a WARD verifier validates a chain's integrity.
 
@@ -51,11 +51,21 @@ Mismatch → **BROKEN** (`GENESIS_MISMATCH`)
 
 For each entry in sequence order:
 
-1. Recompute `chain_hash` using the formula from SPEC §4.4:
-   ```
-   SHA-256(prev_chain_hash + "|" + chain_id + "|" + seq + "|" + ward_entry_id + "|" + timestamp + "|" + source_kind + "|" + source_id + "|" + payload_hash)
-   ```
-2. Confirm the computed hash equals the stored `chain_hash`
+1. Select the hash scheme from the entry's `ward_version` (SPEC §16.1):
+   - `"0.2"` → canonical-JSON hash body (SPEC §4.4):
+     ```
+     SHA-256(canonical_json({ chain_id, issuer_id, payload_hash,
+       prev_chain_hash, seq, source_id, source_kind, ward_entry_id,
+       ward_version, witnessed_at }))
+     ```
+   - `"0.1"` → legacy delimiter concatenation (SPEC Appendix A).
+   - Any other value → **BROKEN** (`CHAIN_HASH_MISMATCH`) with a detail noting
+     the unrecognized version.
+2. Recompute `chain_hash` under that scheme.
+3. Confirm the computed hash equals the stored `chain_hash`.
+4. If the entry is v0.1 and its `ward_entry_id` or `source_id` contains the
+   `|` character, append a warning to the result's `warnings` array (delimiter
+   injection exposure, SPEC Appendix A).
 
 Mismatch → **BROKEN** (`CHAIN_HASH_MISMATCH`)
 
@@ -113,7 +123,7 @@ A verifier **MUST** produce a result object.
 {
   "status": "INTACT",
   "chain_id": "ward:org/quox/env/production",
-  "ward_version": "0.1",
+  "ward_version": "0.2",
   "entry_count": 1042,
   "head_seq": 1042,
   "head_chain_hash": "<chain_hash of seq 1042>",
@@ -170,6 +180,12 @@ Verifiers **SHOULD** use consistent reason codes:
 | `DUPLICATE_SOURCE` | Same (chain_id, source_kind, source_id) appears more than once |
 | `TIP_MISMATCH` | Tip's chain_hash does not match the entry at tip_seq |
 | `TIP_SIGNATURE_INVALID` | Tip signature does not verify against the declared key |
+| `INCOMPLETE_CHAIN` | (PARTIAL) Chain verified up to a point, but later entries are unavailable (e.g., a tip references a seq beyond the available entries) |
+
+The first seven codes accompany `BROKEN`; `INCOMPLETE_CHAIN` accompanies
+`PARTIAL`. Implementations **MAY** define additional reason codes; a consumer
+that encounters an unknown code **MUST** treat it according to the `status`
+field, never as a success.
 
 ---
 

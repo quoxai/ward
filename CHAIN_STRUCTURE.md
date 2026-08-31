@@ -1,4 +1,4 @@
-# WARD Chain Structure (v0.1)
+# WARD Chain Structure (v0.2)
 
 This document defines how WARD chains are scoped, stored, and managed throughout their lifecycle.
 
@@ -39,6 +39,7 @@ Implementations **MAY** use custom chain ID patterns as long as they:
 - Are unique within the deployment
 - Are stable (do not change after creation)
 - Do not conflict with the `ward:org/` or `ward:meta/` conventions
+- Do not contain the reserved `::` sequence (SPEC.md §5.2)
 
 ---
 
@@ -61,7 +62,7 @@ CREATE TABLE ward_entries (
     prev_chain_hash TEXT NOT NULL,
     chain_hash      TEXT NOT NULL,
     issuer_id       TEXT NOT NULL,
-    ward_version    TEXT NOT NULL DEFAULT '0.1',
+    ward_version    TEXT NOT NULL DEFAULT '0.2',
     source_ts       TEXT,
     tags            TEXT,  -- JSON array
     sig             TEXT,
@@ -118,7 +119,7 @@ CREATE TABLE ward_entries (
     prev_chain_hash CHAR(64) NOT NULL,
     chain_hash      CHAR(64) NOT NULL,
     issuer_id       TEXT NOT NULL,
-    ward_version    TEXT NOT NULL DEFAULT '0.1',
+    ward_version    TEXT NOT NULL DEFAULT '0.2',
     source_ts       TIMESTAMPTZ,
     tags            JSONB,
     sig             TEXT,

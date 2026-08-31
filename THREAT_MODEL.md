@@ -1,4 +1,4 @@
-# WARD Threat Model (v0.1)
+# WARD Threat Model (v0.2)
 
 This document describes the threats WARD is designed to mitigate, the threats it cannot fully mitigate, and the practical mitigations recommended for deployments.
 
@@ -155,6 +155,26 @@ Each boundary is a place where tampering, substitution, or denial may be attempt
 - Maintain key revocation lists.
 - Separate keys per environment (dev/staging/production).
 - Meta-chain tips signed with a different key provide cross-checking.
+
+### T9 — Hash-input ambiguity (delimiter injection) — RESOLVED in v0.2 for new entries
+
+**Attack:** In the v0.1 chain-hash scheme (SPEC.md Appendix A), fields were
+concatenated with `|` separators and `ward_entry_id`/`source_id` carried no
+charset restriction. An attacker who controls one of those values (EXTERNAL
+`source_id` is caller-provided) can craft a value containing `|` so that two
+distinct field tuples produce the identical hash input. The chain then commits
+to an ambiguous statement: the same `chain_hash` "witnesses" either tuple.
+**Mitigation (v0.2):** the hash body is canonical JSON (SPEC.md §4.4); string
+escaping makes field boundaries unambiguous for every input, and
+`ward_version` inside the hash body pins the scheme against downgrade.
+**Residual risk:** existing v0.1 entries remain ambiguous in principle.
+Verifiers warn when a v0.1 entry's `ward_entry_id` or `source_id` contains
+`|` (VERIFICATION.md §3 Step 2); absent that character, the v0.1 hash input
+parses unambiguously and the commitment stands.
+
+Related caveat: OPTIONAL fields (`source_ts`, `tags`, `sig`) are outside the
+hash body in both schemes. They are annotations, not commitments — a party
+relying on them for anything security-relevant is out of contract.
 
 ---
 

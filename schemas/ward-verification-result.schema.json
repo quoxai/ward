@@ -2,9 +2,11 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/quoxai/ward/schemas/ward-verification-result.schema.json",
   "title": "WARD Verification Result",
-  "description": "Output format for a WARD verifier (v0.1). See VERIFICATION.md sections 4-5.",
+  "description": "Output format for a WARD verifier (v0.2). See VERIFICATION.md sections 4-5.",
   "type": "object",
-  "required": ["status"],
+  "required": [
+    "status"
+  ],
   "oneOf": [
     {
       "properties": {
@@ -47,7 +49,9 @@
           }
         }
       },
-      "required": ["status"]
+      "required": [
+        "status"
+      ]
     },
     {
       "properties": {
@@ -75,7 +79,10 @@
           "additionalProperties": true
         }
       },
-      "required": ["status", "reason"]
+      "required": [
+        "status",
+        "reason"
+      ]
     },
     {
       "properties": {
@@ -86,14 +93,18 @@
           "type": "string"
         },
         "reason": {
-          "type": "string"
+          "type": "string",
+          "description": "PARTIAL reason code. INCOMPLETE_CHAIN is the standard code (VERIFICATION.md section 5); implementations MAY define others, and consumers MUST treat unknown codes per the status field, never as success."
         },
         "details": {
           "type": "object",
           "additionalProperties": true
         }
       },
-      "required": ["status", "reason"]
+      "required": [
+        "status",
+        "reason"
+      ]
     }
   ]
 }

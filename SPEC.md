@@ -1,8 +1,14 @@
-# WARD SPEC — Write-once Append-only Receipt Digests (v0.1)
+# WARD SPEC — Write-once Append-only Receipt Digests (v0.2)
 
 **Status:** Draft
-**Scope (v0.1):** Witness + Chain + Verify
-**Non-goals (v0.1):** Federation, hardware-backed signing, multi-sink consensus, blockchain anchoring (these are roadmap items).
+**Scope (v0.2):** Witness + Chain + Verify
+**Non-goals (v0.2):** Federation, hardware-backed signing, multi-sink consensus, blockchain anchoring (these are roadmap items).
+
+> **v0.2 is a breaking revision.** It replaces the v0.1 delimiter-concatenation
+> chain hash with canonical-JSON hashing (see §4.4 and Appendix A). Chains are
+> append-only and are never rehashed: existing v0.1 chains remain valid and
+> verifiable under the legacy scheme, selected by each entry's `ward_version`
+> (see §16.1).
 
 WARD defines a minimal, interoperable way to produce **tamper-evident hash-chain witnesses** over events from AEE, AOCL, and VOLT — without storing event content. WARD observes and receipts; it does not record payloads.
 
@@ -39,7 +45,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### 2.3 Minimal schema, extensible evolution
 - Every ward entry **MUST** include `ward_version`.
 - Unknown fields **MUST** be ignored by verifiers (forward compatibility).
-- Breaking changes **MUST** increment `ward_version` (e.g., `0.2`, `1.0`).
+- Breaking changes **MUST** increment `ward_version` under the change policy in §16.2.
 
 ### 2.4 Deterministic and reproducible
 - All hashes **MUST** be deterministically reproducible from the same inputs.
@@ -89,19 +95,39 @@ genesis_hash = SHA-256("WARD-GENESIS|" + chain_id)
 
 - The input is the literal UTF-8 string `WARD-GENESIS|` concatenated with the `chain_id`.
 - The genesis hash serves as `prev_chain_hash` for the first entry (`seq = 1`).
+- This formula is unchanged from v0.1 and is not affected by the delimiter
+  concern addressed in §4.4: the input has exactly one variable field after a
+  fixed literal prefix, so no two distinct inputs can collide by boundary
+  ambiguity. Keeping it stable also means v0.1 and v0.2 chains share genesis
+  computation.
 
 ### 4.4 Chain hash
 
-Each entry's `chain_hash` links it to its predecessor:
+Each entry's `chain_hash` links it to its predecessor. It is computed over the
+canonical JSON of the entry's **hash body**:
 
 ```
-chain_hash = SHA-256(prev_chain_hash + "|" + chain_id + "|" + seq + "|" + ward_entry_id + "|" + timestamp + "|" + source_kind + "|" + source_id + "|" + payload_hash)
+hash_body  = the 10 REQUIRED fields of §6.1 excluding chain_hash itself:
+             { chain_id, issuer_id, payload_hash, prev_chain_hash, seq,
+               source_id, source_kind, ward_entry_id, ward_version, witnessed_at }
+
+chain_hash = SHA-256(canonical_json(hash_body))
 ```
 
-- All values are UTF-8 strings concatenated with pipe (`|`) separators.
-- `seq` is the decimal string representation of the sequence number (no leading zeros).
-- `timestamp` is the ISO 8601 UTC string from the entry's `witnessed_at` field.
-- The pipe-separated format is chosen for simplicity and debuggability.
+- `canonical_json` is the canonicalization defined in §3.2 (UTF-8, no
+  insignificant whitespace, keys sorted lexicographically, NFC strings).
+- `seq` is hashed as a JSON integer, not a string.
+- OPTIONAL fields (`source_ts`, `tags`, `sig`) **MUST NOT** be included in the
+  hash body. They are therefore not tamper-protected by the chain; see
+  THREAT_MODEL.md §6 (T9).
+
+**Why canonical JSON and not concatenation:** v0.1 concatenated
+caller-supplied strings with `|` separators. Because `ward_entry_id` and
+`source_id` carry no charset restriction, two distinct field tuples could
+produce an identical hash input (delimiter injection), undermining the
+uniqueness of the commitment. JSON string escaping makes the field boundaries
+unambiguous for every possible input. The legacy v0.1 formula is preserved in
+Appendix A for verifying existing chains.
 
 ### 4.5 Signatures (optional in v0.1)
 
@@ -133,6 +159,14 @@ Examples:
 - `ward:org/quox/env/production`
 - `ward:org/quox/env/staging`
 - `ward:meta/quox-global`
+
+Constraints:
+- A `chain_id` **MUST NOT** contain the sequence `::` — it is reserved as the
+  separator in meta-chain `source_id` values (§13.3).
+- Identifiers (`chain_id`, `ward_entry_id`, `source_id`) **SHOULD** be limited
+  to printable ASCII without whitespace. With v0.2 canonical-JSON hashing this
+  is hygiene rather than a hashing-safety requirement, but it keeps IDs
+  greppable, quotable, and safe in URLs and logs.
 
 ### 5.3 Time
 - `witnessed_at` **MUST** be ISO 8601 with UTC offset `Z`, e.g., `2026-03-05T14:30:00.000Z`.
@@ -412,16 +446,34 @@ Implementations **SHOULD** configure storage to be append-only:
 
 ## 16. Versioning
 
-### 16.1 Protocol version
+### 16.1 Protocol version and hash scheme selection
 
 - `ward_version` is a string in `major.minor` format.
-- v0.1 is the initial draft version.
+- The `ward_version` stored in each entry selects the chain-hash scheme a
+  verifier **MUST** use for that entry:
+
+| `ward_version` | Chain-hash scheme |
+|----------------|-------------------|
+| `0.1` | Legacy delimiter concatenation (Appendix A) |
+| `0.2` | Canonical-JSON hash body (§4.4) |
+
+- Chains are append-only and are never rehashed. A chain **MAY** therefore
+  contain v0.1 entries followed by v0.2 entries if the writer upgraded
+  mid-chain; each entry verifies under its own declared scheme, and the
+  linkage rules (§14) are unchanged.
+- New chains and new entries **MUST** use the current version (`0.2`).
+- In v0.2 the `ward_version` field is part of the hash body (§4.4), so an
+  entry's declared scheme is itself tamper-protected. v0.1 entries do not have
+  this property; see THREAT_MODEL.md §6 (T9).
 
 ### 16.2 Change policy
 
 - Patch changes (typos, clarifications): no version bump required.
-- Backwards-compatible schema additions: bump minor (`0.1` -> `0.2`).
-- Backwards-incompatible changes: bump major (`0.x` -> `1.0`).
+- While the major version is `0`: a minor bump (`0.1` -> `0.2`) **MAY** be a
+  breaking change, and every breaking change **MUST** bump at least the minor
+  version. This is the standard pre-1.0 convention.
+- From `1.0` onward: breaking changes **MUST** bump the major version;
+  backwards-compatible additions bump the minor version.
 
 Changes **SHOULD** be recorded in `CHANGELOG.md`.
 
@@ -472,10 +524,24 @@ WARD witnesses AOCL decisions by ID and hash. WARD does not evaluate policies or
 
 ---
 
-## 19. Spec change policy (informative)
+## Appendix A — Legacy v0.1 chain hash (for verifying existing chains)
 
-- Patch changes (typos, clarifications): no version bump required
-- Backwards-compatible schema additions: bump minor (`0.1` -> `0.2`)
-- Backwards-incompatible changes: bump major (`0.x` -> `1.0`)
+Entries with `ward_version` `"0.1"` computed `chain_hash` by concatenation:
 
-Changes SHOULD be recorded in `CHANGELOG.md`.
+```
+chain_hash = SHA-256(prev_chain_hash + "|" + chain_id + "|" + seq + "|" + ward_entry_id + "|" + timestamp + "|" + source_kind + "|" + source_id + "|" + payload_hash)
+```
+
+- All values are UTF-8 strings concatenated with pipe (`|`) separators.
+- `seq` is the decimal string representation of the sequence number (no
+  leading zeros).
+- `timestamp` is the ISO 8601 UTC string from the entry's `witnessed_at` field.
+- `issuer_id` and `ward_version` are NOT part of the v0.1 hash input.
+
+This scheme is **deprecated**: because `ward_entry_id` and `source_id` carry
+no charset restriction, a crafted value containing `|` can make two distinct
+field tuples produce the same hash input (delimiter injection, THREAT_MODEL.md
+§6 T9). Verifiers **MUST** still implement it to verify existing v0.1 chains,
+**MUST NOT** accept new v0.1 entries, and **SHOULD** surface a warning (see
+VERIFICATION.md §4.2 `warnings`) when a verified chain contains v0.1 entries
+whose `ward_entry_id` or `source_id` contain the `|` character.

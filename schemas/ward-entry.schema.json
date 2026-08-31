@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/quoxai/ward/schemas/ward-entry.schema.json",
   "title": "WARD Entry",
-  "description": "A single ward entry (v0.1). A content-free hash-chain receipt witnessing a source event. See SPEC.md section 6.",
+  "description": "A single ward entry (v0.2). A content-free hash-chain receipt witnessing a source event. See SPEC.md section 6.",
   "type": "object",
   "required": [
     "ward_version",
@@ -20,7 +20,7 @@
   "properties": {
     "ward_version": {
       "type": "string",
-      "description": "Protocol version, e.g. \"0.1\"",
+      "description": "Protocol version, e.g. \"0.2\". Selects the chain-hash scheme (SPEC.md section 16.1): \"0.2\" canonical-JSON hash body, \"0.1\" legacy concatenation (verify-only).",
       "pattern": "^[0-9]+\\.[0-9]+$"
     },
     "ward_entry_id": {
@@ -40,13 +40,19 @@
     },
     "witnessed_at": {
       "type": "string",
-      "description": "ISO 8601 timestamp with UTC Z suffix — when WARD observed the source event",
+      "description": "ISO 8601 timestamp with UTC Z suffix \u2014 when WARD observed the source event",
       "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?Z$"
     },
     "source_kind": {
       "type": "string",
       "description": "The kind of source event being witnessed",
-      "enum": ["AEE", "AOCL", "VOLT", "WARD", "EXTERNAL"]
+      "enum": [
+        "AEE",
+        "AOCL",
+        "VOLT",
+        "WARD",
+        "EXTERNAL"
+      ]
     },
     "source_id": {
       "type": "string",
@@ -65,7 +71,7 @@
     },
     "chain_hash": {
       "type": "string",
-      "description": "This entry's computed chain hash (see SPEC.md section 4.4)",
+      "description": "This entry's computed chain hash: SHA-256 of the canonical JSON of the 10 required fields excluding chain_hash itself (see SPEC.md section 4.4; legacy v0.1 scheme in Appendix A)",
       "pattern": "^[0-9a-f]{64}$"
     },
     "issuer_id": {

@@ -13,7 +13,7 @@
   "requires": null,
   "payload": {
     "title": "WARD Protocol Specification for AI Systems",
-    "version": "0.1",
+    "version": "0.2",
     "purpose": "Self-contained explanation of WARD for AI agents. This document is itself a valid AEE envelope.",
     "document_type": "Static reference specification. Not a runtime event. Parse once, integrate permanently.",
 
@@ -43,7 +43,7 @@
       "required_count": 11,
       "optional_count": 3,
       "required": {
-        "ward_version": {"type": "string", "description": "Protocol version. \"0.1\" for now."},
+        "ward_version": {"type": "string", "description": "Protocol version. \"0.2\" current; \"0.1\" legacy (selects the deprecated concatenation hash scheme, SPEC.md Appendix A)."},
         "ward_entry_id": {"type": "string", "description": "Unique identifier within the chain."},
         "chain_id": {"type": "string", "description": "Chain this entry belongs to. Convention: ward:org/<org>/env/<env>"},
         "seq": {"type": "integer", "description": "Monotonically increasing from 1. No gaps."},
