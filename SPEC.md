@@ -300,7 +300,7 @@ A tip is a checkpoint summarizing chain state at a point in time.
 | `sink_ref` | string | reference to external sink (e.g., Gitea tag URL, S3 object key) |
 | `notes` | string | human-readable annotation |
 
-Tips **SHOULD** be signed. Unsigned tips provide checkpoint convenience but weaker non-repudiation.
+Tips **SHOULD** be signed. Unsigned tips provide checkpoint convenience but weaker non-repudiation. A tip carrying `sig` **MUST** also carry `key_id`: a signature with no key identifier cannot be resolved and verified, so it would be an annotation posing as evidence.
 
 ---
 

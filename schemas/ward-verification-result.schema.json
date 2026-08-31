@@ -21,11 +21,13 @@
         },
         "entry_count": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
         "head_seq": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
         "head_chain_hash": {
           "type": "string",
@@ -36,11 +38,13 @@
         },
         "tips_verified": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
         "signatures_verified": {
           "type": "integer",
-          "minimum": 0
+          "minimum": 0,
+          "maximum": 9007199254740991
         },
         "warnings": {
           "type": "array",

@@ -30,9 +30,8 @@
     },
     "chain_id": {
       "type": "string",
-      "description": "Identifier for the chain this entry belongs to. MUST NOT contain the reserved \"::\" sequence (SPEC.md section 5.2).",
-      "minLength": 1,
-      "pattern": "^(?!.*::).+$"
+      "description": "Identifier for the chain this entry belongs to. For ward_version 0.2 and later it MUST NOT contain the reserved \"::\" sequence (SPEC.md section 5.2); v0.1 entries predate that rule and a violation warns instead (SPEC.md Appendix A).",
+      "minLength": 1
     },
     "seq": {
       "type": "integer",
@@ -129,6 +128,27 @@
       },
       "then": {
         "description": "Per-entry signature verification is implementation-defined in v0.2; a sig without a resolvable key identifier is an annotation, not evidence."
+      }
+    },
+    {
+      "if": {
+        "not": {
+          "properties": {
+            "ward_version": {
+              "const": "0.1"
+            }
+          },
+          "required": [
+            "ward_version"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "chain_id": {
+            "pattern": "^(?!.*::).+$"
+          }
+        }
       }
     }
   ]
