@@ -2,7 +2,7 @@
 
 Thanks for helping improve WARD.
 
-WARD is a **protocol/specification** repo. The goal is integrity, simplicity, and interoperability — not feature accumulation.
+WARD is a **protocol/specification** repo. The goal is integrity, simplicity, and interoperability, not feature accumulation.
 
 If you're proposing a change, treat it like changing a public standard: small, careful, verifiable.
 
@@ -50,13 +50,13 @@ If you propose a feature that belongs on the roadmap, we'll ask you to move it t
 
 ## How to propose changes
 
-### Option A — Small doc fixes (typos/clarity)
+### Option A: Small doc fixes (typos/clarity)
 
 1. Open a PR
 2. Clearly state what changed and why
 3. No spec version bump required for pure clarifications
 
-### Option B — Spec changes (schema/behavior)
+### Option B: Spec changes (schema/behavior)
 
 1. Open a GitHub issue first describing:
    - Problem statement

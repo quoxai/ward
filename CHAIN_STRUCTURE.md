@@ -249,4 +249,4 @@ For a chain with 10,000 entries:
 
 Tips add negligible overhead (~300 bytes each).
 
-Meta-chains are even smaller — they witness tips, not individual events.
+Meta-chains are even smaller: they witness tips, not individual events.

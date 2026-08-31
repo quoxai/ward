@@ -28,7 +28,7 @@ construction.
 
 ---
 
-## Example 1 — Single AEE envelope witness
+## Example 1: Single AEE envelope witness
 
 ### Scenario
 
@@ -113,7 +113,7 @@ is now complete. The `chain_hash` becomes `prev_chain_hash` for the next entry.
 
 ---
 
-## Example 2 — 3-entry chain with verification
+## Example 2: 3-entry chain with verification
 
 ### Scenario
 
@@ -279,7 +279,7 @@ A verifier performs these checks:
 
 ---
 
-## Example 3 — Meta-chain witnessing tips
+## Example 3: Meta-chain witnessing tips
 
 ### Scenario
 
@@ -368,7 +368,7 @@ separator (SPEC.md §13.3).
 
 ---
 
-## Example 4 — Tamper detection
+## Example 4: Tamper detection
 
 ### Scenario
 
@@ -437,7 +437,7 @@ If the attacker rewrites entries 2 and 3 with consistent hashes:
 
 ---
 
-## Example 5 — Signed tip
+## Example 5: Signed tip
 
 ### Scenario
 
@@ -477,9 +477,9 @@ page 1; verify it against the published public key
 
 A verifier:
 1. Locates entry seq=3 in the chain
-2. Confirms `tip_chain_hash` equals entry 3's `chain_hash` — **PASS**
+2. Confirms `tip_chain_hash` equals entry 3's `chain_hash`: **PASS**
 3. Resolves the public key for `ed25519:sha256:765fe10404e81eb5`
-4. Verifies the Ed25519 signature over the `tip_chain_hash` bytes — **PASS**
+4. Verifies the Ed25519 signature over the `tip_chain_hash` bytes: **PASS**
 5. Optionally confirms `sink_ref` exists and matches (implementation-defined)
 
 ### Verification result
@@ -504,10 +504,10 @@ A verifier:
 ## Practical takeaway
 
 WARD's power comes from its simplicity:
-- No content stored — nothing to leak
-- Hash chain — any modification is detectable
-- Signed tips — external anchors prevent chain rewrites
-- Meta-chains — deployment-wide integrity in one checkpoint
+- No content stored: nothing to leak
+- Hash chain: any modification is detectable
+- Signed tips: external anchors prevent chain rewrites
+- Meta-chains: deployment-wide integrity in one checkpoint
 
 If you can show an auditor a signed tip from an external sink and a passing
 verification report, you've shown something most systems can't: **proof that

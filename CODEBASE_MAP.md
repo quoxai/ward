@@ -1,11 +1,11 @@
-# WARD — Codebase Map
+# WARD: Codebase Map
 
 > **Regenerated:** 2026-08-11T11:00Z
 > **Protocol Version:** 0.2 (draft)
 
 ## Overview
 
-**WARD — Write-once Append-only Receipt Digests.** A content-free hash-chain witnessing protocol with tips, meta-chains, and optional Ed25519 signing. Produces tamper-evident receipts over AEE / AOCL / VOLT events without storing event content. Part of the Quox protocol family. Specification only, no runtime code in this repo.
+**WARD: Write-once Append-only Receipt Digests.** A content-free hash-chain witnessing protocol with tips, meta-chains, and optional Ed25519 signing. Produces tamper-evident receipts over AEE / AOCL / VOLT events without storing event content. Part of the Quox protocol family. Specification only, no runtime code in this repo.
 
 ---
 

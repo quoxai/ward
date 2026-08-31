@@ -1,4 +1,4 @@
-# Changelog — WARD (Write-once Append-only Receipt Digests)
+# Changelog: WARD (Write-once Append-only Receipt Digests)
 
 All notable changes to the **WARD protocol specification** will be documented in this file.
 
@@ -7,7 +7,7 @@ This project follows a pragmatic versioning approach:
 - **Minor**: backwards-compatible additions
 - **Major**: breaking changes
 
-## [0.2.0] — 2026-08-31
+## [0.2.0] - 2026-08-31
 
 ### Changed (breaking)
 - **Chain hash is now computed over the canonical JSON of the entry hash body**
@@ -77,7 +77,7 @@ which every value in the document is real and reproducible; this note remains
 only as a record that the 0.1.0-era examples should not be trusted as
 computed values.
 
-## [0.1.0] — 2026-03-05
+## [0.1.0] - 2026-03-05
 
 ### Added
 - Initial WARD v0.1 protocol specification:

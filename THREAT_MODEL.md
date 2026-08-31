@@ -17,7 +17,7 @@ WARD v0.2 aims to provide:
    - Prove that event A was witnessed before event B within a chain.
 
 3. **Content-free privacy**
-   - Never store or expose source event content — only hashes and references.
+   - Never store or expose source event content, only hashes and references.
 
 4. **External anchoring** (via tips)
    - Publish chain state to append-only sinks where it cannot be retroactively modified.
@@ -92,31 +92,31 @@ Each boundary is a place where tampering, substitution, or denial may be attempt
 
 ## 5) Threats WARD mitigates (T1–T5)
 
-### T1 — Post-hoc tampering of entries
+### T1: Post-hoc tampering of entries
 
 **Attack:** Modify a ward entry after it was created (e.g., change `source_id` or `payload_hash`).
 **Mitigation:** `chain_hash` recomputation fails at the modified entry (`CHAIN_HASH_MISMATCH`).
 **Residual risk:** If attacker rehashes the entire chain from the modified point forward, see T6.
 
-### T2 — Deletion of entries
+### T2: Deletion of entries
 
 **Attack:** Remove an entry from the middle of the chain.
 **Mitigation:** Chain linkage breaks (`CHAIN_LINK_BROKEN`) and sequence gap detected (`SEQ_INVALID`).
 **Residual risk:** Same as T1 if attacker rebuilds the chain.
 
-### T3 — Insertion of fake entries
+### T3: Insertion of fake entries
 
 **Attack:** Insert a fabricated entry (e.g., to claim an event was witnessed when it wasn't).
 **Mitigation:** Chain linkage breaks at the insertion point unless attacker rehashes all subsequent entries.
 **Residual risk:** Same as T1 if attacker rebuilds the chain.
 
-### T4 — Backdating
+### T4: Backdating
 
 **Attack:** Create an entry with a `witnessed_at` timestamp earlier than its actual creation.
 **Mitigation:** If tips are published to external sinks with their own timestamps, backdating is detectable via timestamp comparison.
 **Residual risk:** Without external sinks, backdating within the chain is hard to detect. Time is asserted by the issuer.
 
-### T5 — Double-witnessing
+### T5: Double-witnessing
 
 **Attack:** Witness the same source event twice in the same chain to create confusion.
 **Mitigation:** The `UNIQUE(chain_id, source_kind, source_id)` constraint prevents duplicate entries.
@@ -126,27 +126,27 @@ Each boundary is a place where tampering, substitution, or denial may be attempt
 
 ## 6) Threats WARD does NOT fully mitigate (T6–T8)
 
-### T6 — Compromised issuer (chain rewrite)
+### T6: Compromised issuer (chain rewrite)
 
-**Attack:** Attacker controls the WARD issuer and rewrites the entire chain with consistent hashes.
-**Why WARD can't solve alone:** The issuer is the trusted entity that creates entries and computes hashes. If compromised, it can produce a "valid" but false chain.
+**Attack:** Attacker controls the WARD issuer and rewrites the entire chain with consistent hashes, or presents an alternative branch (fork) built from the same predecessor entry while withholding the original branch.
+**Why WARD can't solve alone:** The issuer is the trusted entity that creates entries and computes hashes. If compromised, it can produce a "valid" but false chain, and a verifier shown only one branch cannot detect the fork from chain data alone.
 **Mitigations:**
-- **Signed tips published to external sinks** — the attacker cannot modify tips already in Gitea signed tags or S3 Object Lock. Verification will detect the mismatch.
-- **Meta-chains** — if a meta-chain witnessed the original tips, the rewrite is detectable.
-- **Multiple independent WARD issuers** — different issuers witnessing the same events create redundancy.
-- **Periodic external audits** — compare chain state against external records.
+- **Signed tips published to external sinks**: the attacker cannot modify tips already in Gitea signed tags or S3 Object Lock. Verification will detect the mismatch.
+- **Meta-chains**: if a meta-chain witnessed the original tips, the rewrite is detectable.
+- **Multiple independent WARD issuers**: different issuers witnessing the same events create redundancy.
+- **Periodic external audits**: compare chain state against external records.
 
-### T7 — Pre-witness modification
+### T7: Pre-witness modification
 
 **Attack:** Source event is modified *before* WARD witnesses it. WARD faithfully records the modified version.
 **Why WARD can't solve alone:** WARD witnesses what it's given. It cannot verify source event authenticity.
 **Mitigations:**
-- VOLT provides its own internal hash chain — modifications to VOLT events are detectable by VOLT.
+- VOLT provides its own internal hash chain: modifications to VOLT events are detectable by VOLT.
 - AEE envelopes may carry signatures (the `sig` field).
 - AOCL decisions should be persisted before WARD observes them.
 - **Defense in depth**: WARD + VOLT + AEE signatures together make pre-witness modification much harder.
 
-### T8 — Key theft (signing keys)
+### T8: Key theft (signing keys)
 
 **Attack:** Attacker steals the Ed25519 key used for tip signing; can sign forged tips.
 **Mitigations:**
@@ -156,7 +156,7 @@ Each boundary is a place where tampering, substitution, or denial may be attempt
 - Separate keys per environment (dev/staging/production).
 - Meta-chain tips signed with a different key provide cross-checking.
 
-### T9 — Hash-input ambiguity (delimiter injection) — RESOLVED in v0.2 for new entries
+### T9: Hash-input ambiguity (delimiter injection), RESOLVED in v0.2 for new entries
 
 **Attack:** In the v0.1 chain-hash scheme (SPEC.md Appendix A), fields were
 concatenated with `|` separators and `ward_entry_id`/`source_id` carried no
@@ -173,7 +173,7 @@ Verifiers warn when a v0.1 entry's `ward_entry_id` or `source_id` contains
 parses unambiguously and the commitment stands.
 
 Related caveat: OPTIONAL fields (`source_ts`, `tags`, `sig`) are outside the
-hash body in both schemes. They are annotations, not commitments — a party
+hash body in both schemes. They are annotations, not commitments: a party
 relying on them for anything security-relevant is out of contract.
 
 ---

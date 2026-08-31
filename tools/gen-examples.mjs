@@ -30,7 +30,16 @@ const MAX_SAFE = 9007199254740991
 function canonicalString(s) {
   if (typeof s.isWellFormed === 'function' && !s.isWellFormed()) throw new Error('string contains unpaired surrogates')
   if (s !== s.normalize('NFC')) throw new Error('string is not NFC-normalized; WARD-CANON-1 rejects rather than repairs')
+  // JSON.stringify implements WARD-CANON-1 minimal escaping exactly: only
+  // \" \\ and control chars (short forms, else lowercase \u00xx); "/" and all
+  // other characters stay literal. Optional escapes like \/ are non-canonical.
   return JSON.stringify(s)
+}
+// self-check the minimal-escaping contract this file relies on
+{
+  const probe = '/a' + String.fromCharCode(1) + '\n"\\'
+  const want = '"/a\\u0001\\n\\"\\\\"'
+  if (JSON.stringify(probe) !== want) throw new Error('runtime JSON.stringify violates WARD-CANON-1 minimal escaping')
 }
 const utf8Compare = (a, b) => Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'))
 function canonicalize(value) {

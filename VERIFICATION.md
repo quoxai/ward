@@ -37,7 +37,7 @@ WARD is a **tamper-evidence** protocol, not an oracle.
 
 ## 3) Verification algorithm (normative, 6 steps)
 
-### Step 0 — Validate entry well-formedness
+### Step 0: Validate entry well-formedness
 
 Before any hash is recomputed, for each entry:
 
@@ -47,14 +47,17 @@ Before any hash is recomputed, for each entry:
 2. Validate against the entry schema: all 11 required fields present, correct
    types, hash fields 64-char lowercase hex, `seq` within `[1, 2^53 - 1]`,
    no null hash-body members.
-3. Confirm every hash-body string is well-formed Unicode in NFC (SPEC §3.2
-   rule 3), and that `chain_id` does not contain `::` (SPEC §5.2).
+3. For entries declaring `ward_version` `0.2` or later: confirm every
+   hash-body string is well-formed Unicode in NFC (SPEC §3.2 rule 3), and
+   that `chain_id` does not contain `::` (SPEC §5.2). For v0.1 entries these
+   rules did not exist when the entries were written: a violation **MUST**
+   produce a warning, not `SCHEMA_INVALID` (SPEC Appendix A).
 
 Any failure → **BROKEN** (`SCHEMA_INVALID`) with a detail naming the entry
 and rule. Skipping this step and verifying hashes alone can "verify" an
 entry whose displayed fields differ from its hashed fields.
 
-### Step 1 — Validate genesis
+### Step 1: Validate genesis
 
 1. Compute `expected_genesis = SHA-256("WARD-GENESIS|" + chain_id)`
 2. Read the first entry (seq=1)
@@ -64,7 +67,7 @@ Mismatch → **BROKEN** (`GENESIS_MISMATCH`)
 
 ---
 
-### Step 2 — Validate chain hashes
+### Step 2: Validate chain hashes
 
 For each entry in sequence order:
 
@@ -80,8 +83,10 @@ For each entry in sequence order:
      the unrecognized version.
 2. Recompute `chain_hash` under that scheme.
 3. Confirm the computed hash equals the stored `chain_hash`.
-4. Enforce version monotonicity (SPEC §16.1): once any entry declares `0.2`,
-   a later entry declaring `0.1` → **BROKEN** (`VERSION_DOWNGRADE`).
+4. Enforce version monotonicity (SPEC §16.1): `ward_version` values must be
+   non-decreasing in `seq` order, compared numerically as (major, minor); an
+   entry declaring a lower version than any earlier entry → **BROKEN**
+   (`VERSION_DOWNGRADE`).
 5. If the entry is v0.1 and its `ward_entry_id` or `source_id` contains the
    `|` character, append a warning to the result's `warnings` array (delimiter
    injection exposure, SPEC Appendix A).
@@ -90,7 +95,7 @@ Mismatch → **BROKEN** (`CHAIN_HASH_MISMATCH`)
 
 ---
 
-### Step 3 — Validate chain linkage
+### Step 3: Validate chain linkage
 
 For each entry where seq > 1:
 
@@ -100,7 +105,7 @@ Mismatch → **BROKEN** (`CHAIN_LINK_BROKEN`)
 
 ---
 
-### Step 4 — Validate ordering and uniqueness
+### Step 4: Validate ordering and uniqueness
 
 1. Confirm `seq` starts at 1
 2. Confirm `seq` is monotonically increasing by 1 (no gaps, no duplicates)
@@ -111,7 +116,7 @@ Duplicate source → **BROKEN** (`DUPLICATE_SOURCE`)
 
 ---
 
-### Step 5 — Validate tips (if present)
+### Step 5: Validate tips (if present)
 
 For each tip:
 
@@ -136,8 +141,8 @@ A verifier **MUST** produce a result object.
 
 | Status | Meaning |
 |--------|---------|
-| `INTACT` | Chain verified successfully — all hashes, linkage, ordering, and tips are correct |
-| `BROKEN` | Verification failed — at least one check did not pass |
+| `INTACT` | Chain verified successfully: all hashes, linkage, ordering, and tips are correct |
+| `BROKEN` | Verification failed: at least one check did not pass |
 | `PARTIAL` | Chain is valid up to a point, but incomplete (e.g., tip references a seq beyond available entries) |
 
 ### 4.2 INTACT result
@@ -196,8 +201,8 @@ Verifiers **SHOULD** use consistent reason codes:
 
 | Code | Meaning |
 |------|---------|
-| `SCHEMA_INVALID` | Entry failed Step 0 well-formedness validation (schema, duplicate members, non-NFC strings, reserved `::` in chain_id) |
-| `VERSION_DOWNGRADE` | A v0.1 entry follows a v0.2 entry in the chain (SPEC §16.1 monotonicity) |
+| `SCHEMA_INVALID` | Entry failed Step 0 well-formedness validation (schema, duplicate members; NFC and `::` rules apply to v0.2+ entries, v0.1 violations warn instead) |
+| `VERSION_DOWNGRADE` | An entry declares a lower ward_version than an earlier entry (SPEC §16.1 monotonicity) |
 | `GENESIS_MISMATCH` | Computed genesis hash does not match entry seq=1 prev_chain_hash |
 | `CHAIN_HASH_MISMATCH` | Recomputed chain_hash does not match stored value |
 | `CHAIN_LINK_BROKEN` | Entry's prev_chain_hash does not match previous entry's chain_hash |
@@ -253,5 +258,5 @@ ward-verify --export <json_path>
 
 ### 7.5 Tip was published but chain was rewritten after
 
-- `TIP_MISMATCH` — the tip's recorded hash no longer matches the chain.
+- `TIP_MISMATCH`: the tip's recorded hash no longer matches the chain.
 - If the tip is in an external sink (Gitea, S3), the attacker cannot modify it.

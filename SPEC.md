@@ -1,4 +1,4 @@
-# WARD SPEC — Write-once Append-only Receipt Digests (v0.2)
+# WARD SPEC: Write-once Append-only Receipt Digests (v0.2)
 
 **Status:** Draft
 **Scope (v0.2):** Witness + Chain + Verify
@@ -10,7 +10,7 @@
 > verifiable under the legacy scheme, selected by each entry's `ward_version`
 > (see §16.1).
 
-WARD defines a minimal, interoperable way to produce **tamper-evident hash-chain witnesses** over events from AEE, AOCL, and VOLT — without storing event content. WARD observes and receipts; it does not record payloads.
+WARD defines a minimal, interoperable way to produce **tamper-evident hash-chain witnesses** over events from AEE, AOCL, and VOLT, without storing event content. WARD observes and receipts; it does not record payloads.
 
 The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this document are to be interpreted as described in [RFC 2119](https://www.rfc-editor.org/rfc/rfc2119).
 
@@ -19,7 +19,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ## 1. Terminology
 
 - **Witness**: The act of observing a source event and recording a content-free receipt.
-- **Ward entry**: A single receipt in the chain, referencing a source event by kind, ID, and payload hash — but never storing the source content.
+- **Ward entry**: A single receipt in the chain, referencing a source event by kind, ID, and payload hash, but never storing the source content.
 - **Ward chain**: An append-only sequence of ward entries linked by `chain_hash`.
 - **Chain hash**: A deterministic hash linking each entry to its predecessor.
 - **Genesis hash**: A deterministic hash derived from the chain ID, anchoring the chain's origin.
@@ -36,7 +36,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 ### 2.1 Content-free by design
 - Ward entries **MUST NOT** store source event content, payloads, or attachments.
 - Ward entries **MUST** reference source events only by identifier and payload hash.
-- This constraint is **non-negotiable** — it is WARD's defining property.
+- This constraint is **non-negotiable**: it is WARD's defining property.
 
 ### 2.2 One-way observation
 - WARD **MUST** be a passive observer. Witnessing **MUST NOT** block, delay, or modify the source event pipeline.
@@ -49,7 +49,7 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 
 ### 2.4 Deterministic and reproducible
 - All hashes **MUST** be deterministically reproducible from the same inputs.
-- No randomness in hash computation — only in ID generation.
+- No randomness in hash computation, only in ID generation.
 
 ---
 
@@ -69,7 +69,14 @@ is authoritative for WARD.
 
 An implementation **MUST** produce canonical byte representations as follows:
 
-1. Serialize as JSON with UTF-8 encoding and no insignificant whitespace.
+1. Serialize as JSON with UTF-8 encoding and no insignificant whitespace,
+   using **minimal string escaping**: escape only the characters JSON
+   requires (`"` as `\"`, `\` as `\\`, and control characters U+0000 to
+   U+001F, using the two-character forms `\b`, `\f`, `\n`, `\r`, `\t` where
+   defined and otherwise `\u00xx` with lowercase hexadecimal digits). Every
+   other character, including `/`, **MUST** appear literally as UTF-8. This
+   makes the serialization of any given string unique: optional escapes such
+   as `\/` or `/` are non-canonical and **MUST NOT** be produced.
 2. Object keys **MUST** be sorted lexicographically by their **UTF-8 byte
    sequences**, compared byte by byte as unsigned values, at every nesting
    level. (This differs from UTF-16 code-unit order for supplementary-plane
@@ -100,7 +107,7 @@ written.
 ## 4. Cryptographic primitives
 
 ### 4.1 Hash algorithm
-- All hashing in WARD v0.1 **MUST** use `SHA-256`.
+- All hashing in WARD v0.2 **MUST** use `SHA-256`.
 
 ### 4.2 Hash encoding
 - Hash values **MUST** be encoded as lowercase hex strings of 64 characters.
@@ -150,9 +157,9 @@ uniqueness of the commitment. JSON string escaping makes the field boundaries
 unambiguous for every possible input. The legacy v0.1 formula is preserved in
 Appendix A for verifying existing chains.
 
-### 4.5 Signatures (optional in v0.1)
+### 4.5 Signatures (optional in v0.2)
 
-Signatures are optional in v0.1 but the schema reserves fields for them.
+Signatures are optional in v0.2 but the schema reserves fields for them.
 
 If used:
 - Signature algorithm **SHOULD** be Ed25519.
@@ -193,7 +200,7 @@ Examples:
 - `ward:meta/quox-global`
 
 Constraints:
-- A `chain_id` **MUST NOT** contain the sequence `::` — it is reserved as the
+- A `chain_id` **MUST NOT** contain the sequence `::`: it is reserved as the
   separator in meta-chain `source_id` values (§13.3).
 - Identifiers (`chain_id`, `ward_entry_id`, `source_id`) **SHOULD** be limited
   to printable ASCII without whitespace. With v0.2 canonical-JSON hashing this
@@ -206,7 +213,7 @@ Constraints:
 
 ---
 
-## 6. ward_entry schema (v0.1)
+## 6. ward_entry schema (v0.2)
 
 A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields:
 
@@ -218,7 +225,7 @@ A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields:
 | `ward_entry_id` | string | unique within the chain |
 | `chain_id` | string | identifies the chain |
 | `seq` | integer | monotonically increasing, starting at 1 |
-| `witnessed_at` | string | ISO 8601 UTC — when WARD observed the event |
+| `witnessed_at` | string | ISO 8601 UTC: when WARD observed the event |
 | `source_kind` | string | enum: `AEE`, `AOCL`, `VOLT`, `WARD`, `EXTERNAL` |
 | `source_id` | string | identifier of the source event |
 | `payload_hash` | string | SHA-256 hex of source event's canonical content |
@@ -230,7 +237,7 @@ A ward entry is a JSON object with 11 REQUIRED and 3 OPTIONAL fields:
 
 | Field | Type | Notes |
 |-------|------|-------|
-| `source_ts` | string | ISO 8601 UTC — timestamp from the source event itself |
+| `source_ts` | string | ISO 8601 UTC: timestamp from the source event itself |
 | `tags` | array | string tags for filtering/categorization |
 | `sig` | string | Ed25519 signature over `chain_hash` (base64) |
 
@@ -251,7 +258,7 @@ A chain **MUST NOT** contain two entries witnessing the same source event. This 
 
 ---
 
-## 7. ward_chain schema (v0.1)
+## 7. ward_chain schema (v0.2)
 
 A ward chain descriptor has 7 REQUIRED fields:
 
@@ -260,7 +267,7 @@ A ward chain descriptor has 7 REQUIRED fields:
 | `chain_id` | string | unique chain identifier |
 | `genesis_hash` | string | SHA-256 hex, computed per §4.3 |
 | `scope` | string | human-readable scope description |
-| `created_at` | string | ISO 8601 UTC — when the chain was created |
+| `created_at` | string | ISO 8601 UTC: when the chain was created |
 | `entry_count` | integer | total entries in the chain |
 | `head_seq` | integer | sequence number of the latest entry |
 | `head_chain_hash` | string | `chain_hash` of the latest entry |
@@ -269,7 +276,7 @@ The chain descriptor is a convenience object for chain management. It is not par
 
 ---
 
-## 8. ward_tip schema (v0.1)
+## 8. ward_tip schema (v0.2)
 
 A tip is a checkpoint summarizing chain state at a point in time.
 
@@ -370,10 +377,10 @@ Selective witnessing **SHOULD** be documented in the chain's `scope` field.
 
 ### 11.3 Chain sealing
 
-A chain **MAY** be sealed (made immutable) by:
-1. Creating a final tip.
-2. Signing the tip.
-3. Publishing the tip to an external sink.
+A chain **MAY** be sealed (made immutable). Sealing **MUST** create and sign
+a final tip covering the whole chain, and **SHOULD** publish that tip to an
+external sink; without external publication, the seal proves nothing to a
+party who does not already trust the store.
 
 Sealed chains **MUST NOT** accept new entries.
 
@@ -494,10 +501,10 @@ Implementations **SHOULD** configure storage to be append-only:
   mid-chain; each entry verifies under its own declared scheme, and the
   linkage rules (§14) are unchanged.
 - New chains and new entries **MUST** use the current version (`0.2`).
-- **Version monotonicity (enforceable):** within a chain, once any entry
-  declares `ward_version` `0.2`, every subsequent entry (higher `seq`)
-  **MUST** also declare `0.2` or later. A verifier **MUST** report a v0.1
-  entry that follows a v0.2 entry as BROKEN (`VERSION_DOWNGRADE`,
+- **Version monotonicity (enforceable):** within a chain, `ward_version`
+  values **MUST** be non-decreasing in `seq` order, compared numerically as
+  (major, minor). A verifier **MUST** report any entry declaring a lower
+  version than an earlier entry as BROKEN (`VERSION_DOWNGRADE`,
   VERIFICATION.md §5). This is checkable from stored data alone and prevents
   an attacker from appending new legacy-scheme entries to an upgraded chain.
 - **Honest limit:** for a chain that has never upgraded (all entries v0.1), a
@@ -570,7 +577,7 @@ WARD witnesses AOCL decisions by ID and hash. WARD does not evaluate policies or
 
 ---
 
-## Appendix A — Legacy v0.1 chain hash (for verifying existing chains)
+## Appendix A: Legacy v0.1 chain hash (for verifying existing chains)
 
 Entries with `ward_version` `"0.1"` computed `chain_hash` by concatenation:
 
@@ -590,6 +597,13 @@ field tuples produce the same hash input (delimiter injection, THREAT_MODEL.md
 §6 T9). Verifiers **MUST** still implement it to verify existing v0.1 chains.
 Writers **MUST NOT** create new v0.1 entries; a verifier enforces this to the
 extent stored data allows via the version-monotonicity rule of §16.1
-(`VERSION_DOWNGRADE`), and **SHOULD** surface a warning (see VERIFICATION.md
+(`VERSION_DOWNGRADE`), and **MUST** append a warning (see VERIFICATION.md
 §4.2 `warnings`) when a verified chain contains v0.1 entries whose
 `ward_entry_id` or `source_id` contain the `|` character.
+
+Well-formedness scoping for legacy entries: the NFC and well-formed-Unicode
+requirements and the `::` prohibition of v0.2 (VERIFICATION.md §3 Step 0)
+apply to v0.2 and later entries only. v0.1 entries predate those rules and
+**MUST NOT** fail `SCHEMA_INVALID` for a non-NFC identifier or a legacy
+`chain_id` containing `::`; a verifier **MUST** append a warning instead, and
+meta-chain references to such a legacy chain are ambiguous to parse.

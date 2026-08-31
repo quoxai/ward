@@ -42,7 +42,7 @@ VOLT (evidence events)   ─────────> WARD observer
 - `source_kind` = `AEE`
 
 **When to witness:**
-- After the envelope is persisted/delivered (not before — witness what exists, not what's in flight)
+- After the envelope is persisted/delivered (not before: witness what exists, not what is in flight)
 
 **What NOT to witness:**
 - Message content, payload fields, attachment data
@@ -77,8 +77,8 @@ VOLT (evidence events)   ─────────> WARD observer
 WARD does NOT witness every VOLT event (that would create redundancy). Instead, witness VOLT at meaningful boundaries:
 
 **What to witness:**
-- VOLT bundle commitments (`last_event_hash` of a finalized bundle) — `source_id` = bundle_id
-- VOLT run completion events — `source_id` = event_id
+- VOLT bundle commitments (`last_event_hash` of a finalized bundle): `source_id` = bundle_id
+- VOLT run completion events: `source_id` = event_id
 - `source_kind` = `VOLT`
 
 **When to witness:**
@@ -92,7 +92,7 @@ WARD does NOT witness every VOLT event (that would create redundancy). Instead, 
 ### 2.4 WARD tips (meta-chain)
 
 **What to witness:**
-- Tips from sub-chains — `source_id` = `<sub_chain_id>::<tip_seq>`
+- Tips from sub-chains: `source_id` = `<sub_chain_id>::<tip_seq>`
 - SHA-256 of the canonical tip JSON as `payload_hash`
 - `source_kind` = `WARD`
 
@@ -174,7 +174,7 @@ WARD **MUST NOT** be used to witness:
 
 - **Ephemeral/transient data**: debug logs, temporary files, in-progress drafts
 - **High-frequency low-value events**: heartbeats, health checks, metrics pings
-- **Secrets or credentials**: even as hashes — do not put token hashes in WARD
+- **Secrets or credentials**: even as hashes: do not put token hashes in WARD
 - **Events that don't exist yet**: only witness persisted/committed events
 - **Everything indiscriminately**: selective witnessing is better than a noisy chain
 
@@ -209,7 +209,7 @@ If the WARD sidecar/hook is unavailable:
 If a source event has already been witnessed in the chain:
 - WARD **MUST** reject the duplicate (uniqueness constraint)
 - This is expected behavior when retrying after transient failures
-- The rejection **MUST NOT** be treated as an error — log at debug level
+- The rejection **MUST NOT** be treated as an error: log at debug level
 
 ### 6.3 Chain unavailable
 

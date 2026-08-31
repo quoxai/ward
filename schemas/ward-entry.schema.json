@@ -115,10 +115,20 @@
       "then": {
         "properties": {
           "source_id": {
-            "pattern": "^(?!.*::.*::).+::[1-9][0-9]*$",
-            "description": "Meta-chain reference: <sub_chain_id>::<tip_seq>, where sub_chain_id contains no \"::\" so the split is unambiguous"
+            "pattern": "^(?:[^:]|:(?!:))+::[1-9][0-9]*$",
+            "description": "Meta-chain reference: <sub_chain_id>::<tip_seq>. The sub-chain id contains no \"::\" (single colons allowed), so splitting on the first \"::\" is unambiguous; tip_seq is a positive decimal integer."
           }
         }
+      }
+    },
+    {
+      "if": {
+        "required": [
+          "sig"
+        ]
+      },
+      "then": {
+        "description": "Per-entry signature verification is implementation-defined in v0.2; a sig without a resolvable key identifier is an annotation, not evidence."
       }
     }
   ]

@@ -1,8 +1,8 @@
-# WARD — Write-once Append-only Receipt Digests
+# WARD: Write-once Append-only Receipt Digests
 
 WARD is Quox's **witnessing layer**.
 
-It produces **tamper-evident, content-free hash-chain receipts** over events from AEE, AOCL, and VOLT — proving that specific events existed at specific points in time, without storing any event content.
+It produces **tamper-evident, content-free hash-chain receipts** over events from AEE, AOCL, and VOLT, proving that specific events existed at specific points in time, without storing any event content.
 
 If **AEE** is how agents communicate, **AOCL** is how they're controlled, **VOLT** is how you prove what happened, then **WARD** is how you prove **the proof hasn't been tampered with**.
 
@@ -10,7 +10,7 @@ If **AEE** is how agents communicate, **AOCL** is how they're controlled, **VOLT
 
 ## Why WARD exists
 
-Evidence systems need a witness. Even VOLT — with its hash-chained traces — can be rewritten if an attacker controls the host and there are no external checkpoints.
+Evidence systems need a witness. Even VOLT, with its hash-chained traces, can be rewritten if an attacker controls the host and there are no external checkpoints.
 
 WARD solves this by maintaining a **separate, content-free hash chain** that observes events from the other protocols:
 
@@ -110,16 +110,16 @@ See: [SPEC.md](SPEC.md), [CHAIN_STRUCTURE.md](CHAIN_STRUCTURE.md), [VERIFICATION
 
 ## Documents
 
-- **[SPEC.md](SPEC.md)** — normative protocol spec (schema, hashing, chaining, versioning)
-- **[CHAIN_STRUCTURE.md](CHAIN_STRUCTURE.md)** — chain scoping, storage schemas, lifecycle, retention
-- **[VERIFICATION.md](VERIFICATION.md)** — verifier algorithm + result format
-- **[INTEGRATION.md](INTEGRATION.md)** — how WARD observes AEE, AOCL, and VOLT events
-- **[THREAT_MODEL.md](THREAT_MODEL.md)** — what WARD mitigates and what it cannot
-- **[WORKED_EXAMPLES.md](WORKED_EXAMPLES.md)** — end-to-end examples with hash walkthroughs
-- **[ROADMAP.md](ROADMAP.md)** — v0.2+ features and explicit non-goals
-- **[SECURITY.md](SECURITY.md)** — vulnerability reporting policy
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** — contribution guidelines
-- **[CHANGELOG.md](CHANGELOG.md)** — version history
+- **[SPEC.md](SPEC.md)**: normative protocol spec (schema, hashing, chaining, versioning)
+- **[CHAIN_STRUCTURE.md](CHAIN_STRUCTURE.md)**: chain scoping, storage schemas, lifecycle, retention
+- **[VERIFICATION.md](VERIFICATION.md)**: verifier algorithm + result format
+- **[INTEGRATION.md](INTEGRATION.md)**: how WARD observes AEE, AOCL, and VOLT events
+- **[THREAT_MODEL.md](THREAT_MODEL.md)**: what WARD mitigates and what it cannot
+- **[WORKED_EXAMPLES.md](WORKED_EXAMPLES.md)**: end-to-end examples with hash walkthroughs
+- **[ROADMAP.md](ROADMAP.md)**: v0.2+ features and explicit non-goals
+- **[SECURITY.md](SECURITY.md)**: vulnerability reporting policy
+- **[CONTRIBUTING.md](CONTRIBUTING.md)**: contribution guidelines
+- **[CHANGELOG.md](CHANGELOG.md)**: version history
 
 ---
 
@@ -138,10 +138,10 @@ The SDK repo is private today and **opening at launch**, together with the npm p
 
 | Protocol | Role | Repo |
 |----------|------|------|
-| **AEE** | Agent Envelope Exchange — message format + correlation | [github.com/quoxai/aee](https://github.com/quoxai/aee) |
-| **AOCL** | Agent Orchestration Control Layers — policy + HITL gates | [github.com/quoxai/aocl](https://github.com/quoxai/aocl) |
-| **VOLT** | Verifiable Operations Ledger & Trace — evidence + bundles | [github.com/quoxai/volt](https://github.com/quoxai/volt) |
-| **WARD** | Write-once Append-only Receipt Digests — witnessing + hash chains | (this repo) |
+| **AEE** | Agent Envelope Exchange: message format + correlation | [github.com/quoxai/aee](https://github.com/quoxai/aee) |
+| **AOCL** | Agent Orchestration Control Layers: policy + HITL gates | [github.com/quoxai/aocl](https://github.com/quoxai/aocl) |
+| **VOLT** | Verifiable Operations Ledger & Trace: evidence + bundles | [github.com/quoxai/volt](https://github.com/quoxai/volt) |
+| **WARD** | Write-once Append-only Receipt Digests: witnessing + hash chains | (this repo) |
 
 ---
 
@@ -149,4 +149,4 @@ The SDK repo is private today and **opening at launch**, together with the npm p
 
 **WARD** stands for **Write-once Append-only Receipt Digests**.
 
-It's a "notary stamp" for agentic workflows — proving events were witnessed without revealing what they contained.
+It's a "notary stamp" for agentic workflows, proving events were witnessed without revealing what they contained.

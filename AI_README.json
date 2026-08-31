@@ -129,28 +129,25 @@
       ]
     },
     "verification": {
-      "statuses": [
-        "INTACT",
-        "BROKEN",
-        "PARTIAL"
+      "steps": [
+        "Step 0: validate well-formedness before hashing: duplicate-member-rejecting parse, schema validation, 64-hex hash fields, seq in [1, 2^53-1]; for v0.2+ entries also NFC well-formed strings and no :: in chain_id. Failure = BROKEN SCHEMA_INVALID.",
+        "Step 1: genesis: SHA-256(\"WARD-GENESIS|\" + chain_id) equals seq=1 prev_chain_hash, else GENESIS_MISMATCH.",
+        "Step 2: per entry, select scheme by ward_version (0.2 canonical JSON hash body; 0.1 legacy Appendix A verify-only), recompute chain_hash, else CHAIN_HASH_MISMATCH. ward_version must be non-decreasing, else VERSION_DOWNGRADE. Warn on | in v0.1 identifiers.",
+        "Step 3: prev_chain_hash linkage, else CHAIN_LINK_BROKEN.",
+        "Step 4: seq from 1, +1, no gaps (SEQ_INVALID); unique (chain_id, source_kind, source_id) (DUPLICATE_SOURCE).",
+        "Step 5: tips match entries (TIP_MISMATCH); Ed25519 over tip_chain_hash hex bytes via deployment-defined key resolution (TIP_SIGNATURE_INVALID)."
       ],
-      "failure_codes": [
+      "reason_codes": [
+        "SCHEMA_INVALID",
+        "VERSION_DOWNGRADE",
         "GENESIS_MISMATCH",
         "CHAIN_HASH_MISMATCH",
         "CHAIN_LINK_BROKEN",
         "SEQ_INVALID",
         "DUPLICATE_SOURCE",
         "TIP_MISMATCH",
-        "TIP_SIGNATURE_INVALID"
-      ],
-      "algorithm_steps": [
-        "Validate genesis hash matches SHA-256(\"WARD-GENESIS|\" + chain_id)",
-        "Recompute chain_hash for each entry and compare to stored value",
-        "Verify prev_chain_hash linkage between consecutive entries",
-        "Validate seq ordering (monotonic from 1, no gaps)",
-        "Check uniqueness constraint (no duplicate source events)",
-        "Validate tips match chain state at tip_seq",
-        "Verify tip signatures if present"
+        "TIP_SIGNATURE_INVALID",
+        "INCOMPLETE_CHAIN (PARTIAL)"
       ]
     },
     "integration_guidance": {
