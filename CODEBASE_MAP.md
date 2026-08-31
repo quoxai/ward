@@ -332,10 +332,11 @@ A meta-chain is a WARD chain that witnesses tips from other WARD chains.
 - **T4**: Backdating (mitigated via external sink timestamps)
 - **T5**: Double-witnessing (prevented via uniqueness constraint)
 
-### Threats WARD Does NOT Fully Mitigate (T6-T8)
+### Threats WARD Does NOT Fully Mitigate (T6-T9)
 - **T6**: Compromised issuer (mitigate with signed tips + external sinks + meta-chains)
 - **T7**: Pre-witness modification (mitigate with defense in depth: VOLT + AEE signatures)
 - **T8**: Key theft (mitigate with HSM, rotation, key separation)
+- **T9**: Hash-input ambiguity / delimiter injection (RESOLVED in v0.2 canonical-JSON scheme for new entries; residual for legacy v0.1 entries, verifier warns on `|` in identifiers)
 
 ### Strongest Deployment Pattern
 ```
@@ -384,7 +385,7 @@ Sub-chain B ──tip──> Gitea tag (signed)
 
 | Document | Purpose | SPEC Reference |
 |----------|---------|----------------|
-| `SPEC.md` | Normative protocol specification (19 sections) | Entire spec |
+| `SPEC.md` | Normative protocol specification (18 sections + Appendix A) | Entire spec |
 | `CHAIN_STRUCTURE.md` | Chain scoping, storage, lifecycle | §7, storage guidance |
 | `INTEGRATION.md` | How to integrate with AEE/AOCL/VOLT | §10 (witnessing rules) |
 | `VERIFICATION.md` | Verifier algorithm + result format | §14 (verification summary) |
@@ -413,7 +414,7 @@ Example types:
 
 ## Reference SDK
 
-A conformant reference implementation exists:
+A reference implementation exists (v0.1 conformant; v0.2 support in progress):
 - **Package**: `@quox/ward` (TypeScript/Node, zero runtime dependencies)
 - **Repo**: github.com/quoxai/ward-sdk (private, opening at launch)
 - **Features**: Chain math (SPEC §4), full verification algorithm, Ed25519 tip signing, external anchoring, `ward-verify` CLI

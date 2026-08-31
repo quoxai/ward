@@ -35,7 +35,24 @@ WARD is a **tamper-evidence** protocol, not an oracle.
 
 ---
 
-## 3) Verification algorithm (normative, 5 steps)
+## 3) Verification algorithm (normative, 6 steps)
+
+### Step 0 — Validate entry well-formedness
+
+Before any hash is recomputed, for each entry:
+
+1. Parse with a JSON parser that **rejects duplicate member names** (SPEC
+   §3.2 rule 5). Last-wins parsing would let one byte sequence carry two
+   different assertions.
+2. Validate against the entry schema: all 11 required fields present, correct
+   types, hash fields 64-char lowercase hex, `seq` within `[1, 2^53 - 1]`,
+   no null hash-body members.
+3. Confirm every hash-body string is well-formed Unicode in NFC (SPEC §3.2
+   rule 3), and that `chain_id` does not contain `::` (SPEC §5.2).
+
+Any failure → **BROKEN** (`SCHEMA_INVALID`) with a detail naming the entry
+and rule. Skipping this step and verifying hashes alone can "verify" an
+entry whose displayed fields differ from its hashed fields.
 
 ### Step 1 — Validate genesis
 
@@ -63,7 +80,9 @@ For each entry in sequence order:
      the unrecognized version.
 2. Recompute `chain_hash` under that scheme.
 3. Confirm the computed hash equals the stored `chain_hash`.
-4. If the entry is v0.1 and its `ward_entry_id` or `source_id` contains the
+4. Enforce version monotonicity (SPEC §16.1): once any entry declares `0.2`,
+   a later entry declaring `0.1` → **BROKEN** (`VERSION_DOWNGRADE`).
+5. If the entry is v0.1 and its `ward_entry_id` or `source_id` contains the
    `|` character, append a warning to the result's `warnings` array (delimiter
    injection exposure, SPEC Appendix A).
 
@@ -98,7 +117,11 @@ For each tip:
 
 1. Locate the entry at `tip_seq`
 2. Confirm `tip_chain_hash` equals that entry's `chain_hash`
-3. If `sig` is present, verify the Ed25519 signature over the `tip_chain_hash` hex bytes using `key_id`
+3. If `sig` is present, resolve `key_id` to a public key using the
+   deployment's documented key-resolution policy (SPEC §4.5; resolution and
+   trust are deployment-defined) and verify the Ed25519 signature over the
+   `tip_chain_hash` hex bytes. A valid signature proves possession of the
+   resolved key, not that the key was authorized; authorization is policy.
 
 Tip hash mismatch → **BROKEN** (`TIP_MISMATCH`)
 Signature invalid → **BROKEN** (`TIP_SIGNATURE_INVALID`)
@@ -173,6 +196,8 @@ Verifiers **SHOULD** use consistent reason codes:
 
 | Code | Meaning |
 |------|---------|
+| `SCHEMA_INVALID` | Entry failed Step 0 well-formedness validation (schema, duplicate members, non-NFC strings, reserved `::` in chain_id) |
+| `VERSION_DOWNGRADE` | A v0.1 entry follows a v0.2 entry in the chain (SPEC §16.1 monotonicity) |
 | `GENESIS_MISMATCH` | Computed genesis hash does not match entry seq=1 prev_chain_hash |
 | `CHAIN_HASH_MISMATCH` | Recomputed chain_hash does not match stored value |
 | `CHAIN_LINK_BROKEN` | Entry's prev_chain_hash does not match previous entry's chain_hash |
@@ -182,10 +207,10 @@ Verifiers **SHOULD** use consistent reason codes:
 | `TIP_SIGNATURE_INVALID` | Tip signature does not verify against the declared key |
 | `INCOMPLETE_CHAIN` | (PARTIAL) Chain verified up to a point, but later entries are unavailable (e.g., a tip references a seq beyond the available entries) |
 
-The first seven codes accompany `BROKEN`; `INCOMPLETE_CHAIN` accompanies
-`PARTIAL`. Implementations **MAY** define additional reason codes; a consumer
-that encounters an unknown code **MUST** treat it according to the `status`
-field, never as a success.
+All codes except `INCOMPLETE_CHAIN` accompany `BROKEN`; `INCOMPLETE_CHAIN`
+accompanies `PARTIAL`. Implementations **MAY** define additional reason
+codes; a consumer that encounters an unknown code **MUST** treat it according
+to the `status` field, never as a success.
 
 ---
 

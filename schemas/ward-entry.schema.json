@@ -30,13 +30,15 @@
     },
     "chain_id": {
       "type": "string",
-      "description": "Identifier for the chain this entry belongs to",
-      "minLength": 1
+      "description": "Identifier for the chain this entry belongs to. MUST NOT contain the reserved \"::\" sequence (SPEC.md section 5.2).",
+      "minLength": 1,
+      "pattern": "^(?!.*::).+$"
     },
     "seq": {
       "type": "integer",
       "description": "Monotonically increasing sequence number, starting at 1",
-      "minimum": 1
+      "minimum": 1,
+      "maximum": 9007199254740991
     },
     "witnessed_at": {
       "type": "string",
@@ -97,5 +99,27 @@
       "minLength": 1
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "source_kind": {
+            "const": "WARD"
+          }
+        },
+        "required": [
+          "source_kind"
+        ]
+      },
+      "then": {
+        "properties": {
+          "source_id": {
+            "pattern": "^(?!.*::.*::).+::[1-9][0-9]*$",
+            "description": "Meta-chain reference: <sub_chain_id>::<tip_seq>, where sub_chain_id contains no \"::\" so the split is unambiguous"
+          }
+        }
+      }
+    }
+  ]
 }

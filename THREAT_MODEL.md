@@ -8,7 +8,7 @@ WARD is a **witnessing integrity** protocol: it provides **tamper-evident hash-c
 
 ## 1) Security objectives
 
-WARD v0.1 aims to provide:
+WARD v0.2 aims to provide:
 
 1. **Tamper evidence for witnessed events**
    - Detect modification, deletion, or insertion of ward entries after the fact.

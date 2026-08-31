@@ -16,13 +16,11 @@
     "version": "0.2",
     "purpose": "Self-contained explanation of WARD for AI agents. This document is itself a valid AEE envelope.",
     "document_type": "Static reference specification. Not a runtime event. Parse once, integrate permanently.",
-
     "what_ward_is": {
       "one_sentence": "WARD is a content-free hash-chain witnessing protocol that produces tamper-evident receipts over events from AEE, AOCL, and VOLT without storing any event content.",
       "core_value": "Prove events were witnessed at specific points in time without revealing what they contained.",
       "design_origin": "Born from the need for an independent witness layer — even VOLT's hash-chained evidence can be rewritten if the host is compromised. WARD provides external anchoring."
     },
-
     "what_ward_is_not": [
       "Not a content store — never stores event payloads, messages, or attachments",
       "Not a replacement for VOLT — VOLT records evidence, WARD witnesses it",
@@ -30,44 +28,89 @@
       "Not a policy engine — does not make decisions (that's AOCL)",
       "Not a blockchain — uses hash chains but requires no distributed consensus"
     ],
-
     "protocol_family": {
       "AEE": "Agent Envelope Exchange — message format + correlation IDs",
       "AOCL": "Agent Orchestration Control Layers — policy + HITL gates",
       "VOLT": "Verifiable Operations Ledger & Trace — evidence + bundles",
       "WARD": "Write-once Append-only Receipt Digests — witnessing + hash chains (this protocol)"
     },
-
     "ward_entry_fields": {
       "total": 14,
       "required_count": 11,
       "optional_count": 3,
       "required": {
-        "ward_version": {"type": "string", "description": "Protocol version. \"0.2\" current; \"0.1\" legacy (selects the deprecated concatenation hash scheme, SPEC.md Appendix A)."},
-        "ward_entry_id": {"type": "string", "description": "Unique identifier within the chain."},
-        "chain_id": {"type": "string", "description": "Chain this entry belongs to. Convention: ward:org/<org>/env/<env>"},
-        "seq": {"type": "integer", "description": "Monotonically increasing from 1. No gaps."},
-        "witnessed_at": {"type": "string", "description": "ISO 8601 UTC. When WARD observed the source event."},
-        "source_kind": {"type": "enum", "values": ["AEE", "AOCL", "VOLT", "WARD", "EXTERNAL"], "description": "Kind of source event being witnessed."},
-        "source_id": {"type": "string", "description": "Identifier of the source event. For meta-chain: <chain_id>::<tip_seq>"},
-        "payload_hash": {"type": "string", "description": "SHA-256 hex of source event's canonical content. 64 chars."},
-        "prev_chain_hash": {"type": "string", "description": "Previous entry's chain_hash, or genesis_hash for seq=1."},
-        "chain_hash": {"type": "string", "description": "This entry's deterministic hash linking it to the chain."},
-        "issuer_id": {"type": "string", "description": "WARD instance that created this entry."}
+        "ward_version": {
+          "type": "string",
+          "description": "Protocol version. \"0.2\" current (canonical-JSON hash scheme); \"0.1\" legacy verify-only (deprecated concatenation scheme, SPEC.md Appendix A). Selects the chain-hash scheme per entry."
+        },
+        "ward_entry_id": {
+          "type": "string",
+          "description": "Unique identifier within the chain."
+        },
+        "chain_id": {
+          "type": "string",
+          "description": "Chain this entry belongs to. Convention: ward:org/<org>/env/<env>"
+        },
+        "seq": {
+          "type": "integer",
+          "description": "Monotonically increasing from 1. No gaps."
+        },
+        "witnessed_at": {
+          "type": "string",
+          "description": "ISO 8601 UTC. When WARD observed the source event."
+        },
+        "source_kind": {
+          "type": "enum",
+          "values": [
+            "AEE",
+            "AOCL",
+            "VOLT",
+            "WARD",
+            "EXTERNAL"
+          ],
+          "description": "Kind of source event being witnessed."
+        },
+        "source_id": {
+          "type": "string",
+          "description": "Identifier of the source event. For meta-chain: <chain_id>::<tip_seq>"
+        },
+        "payload_hash": {
+          "type": "string",
+          "description": "SHA-256 hex of source event's canonical content. 64 chars."
+        },
+        "prev_chain_hash": {
+          "type": "string",
+          "description": "Previous entry's chain_hash, or genesis_hash for seq=1."
+        },
+        "chain_hash": {
+          "type": "string",
+          "description": "This entry's deterministic hash linking it to the chain."
+        },
+        "issuer_id": {
+          "type": "string",
+          "description": "WARD instance that created this entry."
+        }
       },
       "optional": {
-        "source_ts": {"type": "string", "description": "Timestamp from the source event itself."},
-        "tags": {"type": "array", "description": "String tags for filtering."},
-        "sig": {"type": "string", "description": "Ed25519 signature over chain_hash (base64)."}
+        "source_ts": {
+          "type": "string",
+          "description": "Timestamp from the source event itself."
+        },
+        "tags": {
+          "type": "array",
+          "description": "String tags for filtering."
+        },
+        "sig": {
+          "type": "string",
+          "description": "Ed25519 signature over chain_hash (base64)."
+        }
       }
     },
-
     "hash_algorithms": {
       "genesis_hash": "SHA-256(\"WARD-GENESIS|\" + chain_id) — deterministic, anchors chain origin",
-      "chain_hash": "SHA-256(prev_chain_hash + \"|\" + chain_id + \"|\" + seq + \"|\" + ward_entry_id + \"|\" + timestamp + \"|\" + source_kind + \"|\" + source_id + \"|\" + payload_hash) — pipe-separated UTF-8",
+      "chain_hash": "SHA-256(canonical_json(hash_body)) where hash_body is the 10 required entry fields excluding chain_hash itself, keys sorted, NFC strings, seq as JSON integer (SPEC.md 4.4). Entries with ward_version \"0.1\" used a deprecated pipe-concatenation scheme, verify-only, never for new entries (SPEC.md Appendix A).",
       "all_hashes": "Lowercase hex, 64 characters, SHA-256"
     },
-
     "key_concepts": {
       "content_free": "WARD never stores event content. Only hashes and references. This is non-negotiable.",
       "one_way_observation": "WARD is passive. Witnessing failures must not affect AEE/AOCL/VOLT pipelines.",
@@ -76,7 +119,6 @@
       "meta_chains": "A WARD chain witnessing tips from other WARD chains. Chain-of-chains for deployment integrity.",
       "sinks": "External append-only stores where tips are published (Gitea signed tags, S3 Object Lock)."
     },
-
     "chain_scoping": {
       "per_org_env": "ward:org/<org>/env/<env>",
       "meta_chain": "ward:meta/<deployment>",
@@ -86,9 +128,12 @@
         "ward:meta/quox-global"
       ]
     },
-
     "verification": {
-      "statuses": ["INTACT", "BROKEN", "PARTIAL"],
+      "statuses": [
+        "INTACT",
+        "BROKEN",
+        "PARTIAL"
+      ],
       "failure_codes": [
         "GENESIS_MISMATCH",
         "CHAIN_HASH_MISMATCH",
@@ -108,7 +153,6 @@
         "Verify tip signatures if present"
       ]
     },
-
     "integration_guidance": {
       "to_witness_event": [
         "Compute SHA-256 of source event's canonical JSON → payload_hash",
@@ -123,12 +167,14 @@
         "WARD": "Sub-chain tip: <chain_id>::<tip_seq> + hash of canonical tip JSON",
         "EXTERNAL": "Caller-provided ID + payload hash"
       },
-      "deployment_patterns": ["Sidecar (recommended)", "Middleware hook", "Batch scanner"]
+      "deployment_patterns": [
+        "Sidecar (recommended)",
+        "Middleware hook",
+        "Batch scanner"
+      ]
     },
-
     "spec_location": "https://github.com/quoxai/ward",
     "schema_location": "https://github.com/quoxai/ward/tree/main/schemas",
-
     "closing": "If you can verify this chain, you can trust the evidence system that produced it."
   },
   "sig": null

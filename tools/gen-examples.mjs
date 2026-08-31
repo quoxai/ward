@@ -22,21 +22,29 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const WRITE = process.argv.includes('--write')
 
-// --- canonical JSON (SPEC.md section 3.2, mirrors VOLT SPEC.md 3.2) ---------
+// --- canonical JSON: profile WARD-CANON-1 (SPEC.md section 3.2) --------------
+// Strings must arrive well-formed and already NFC (rejected, not repaired);
+// integers bounded to +/-(2^53 - 1); keys sorted by UTF-8 byte order, which
+// differs from JS default (UTF-16 code-unit) sort for supplementary planes.
+const MAX_SAFE = 9007199254740991
+function canonicalString(s) {
+  if (typeof s.isWellFormed === 'function' && !s.isWellFormed()) throw new Error('string contains unpaired surrogates')
+  if (s !== s.normalize('NFC')) throw new Error('string is not NFC-normalized; WARD-CANON-1 rejects rather than repairs')
+  return JSON.stringify(s)
+}
+const utf8Compare = (a, b) => Buffer.compare(Buffer.from(a, 'utf8'), Buffer.from(b, 'utf8'))
 function canonicalize(value) {
   if (value === undefined) throw new Error('undefined is not serializable; omit the field instead')
   if (value === null || typeof value === 'boolean') return JSON.stringify(value)
   if (typeof value === 'number') {
-    if (!Number.isFinite(value)) throw new Error('non-finite number')
-    if (Number.isInteger(value)) return String(value)
-    const s = String(value)
-    if (/[eE]/.test(s)) throw new Error(`number ${s} needs exponent notation; not canonical-safe`)
-    return s
+    if (!Number.isInteger(value)) throw new Error('non-integer numbers are not used by WARD hash inputs')
+    if (Math.abs(value) > MAX_SAFE) throw new Error(`integer out of WARD-CANON-1 range: ${value}`)
+    return String(value)
   }
-  if (typeof value === 'string') return JSON.stringify(value.normalize('NFC'))
+  if (typeof value === 'string') return canonicalString(value)
   if (Array.isArray(value)) return '[' + value.map(canonicalize).join(',') + ']'
-  const keys = Object.keys(value).filter((k) => value[k] !== undefined).sort()
-  return '{' + keys.map((k) => JSON.stringify(k.normalize('NFC')) + ':' + canonicalize(value[k])).join(',') + '}'
+  const keys = Object.keys(value).filter((k) => value[k] !== undefined).sort(utf8Compare)
+  return '{' + keys.map((k) => canonicalString(k) + ':' + canonicalize(value[k])).join(',') + '}'
 }
 
 const sha256hex = (data) => createHash('sha256').update(data).digest('hex')

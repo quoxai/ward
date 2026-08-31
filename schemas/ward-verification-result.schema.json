@@ -65,6 +65,8 @@
           "type": "string",
           "description": "Standard failure reason code",
           "enum": [
+            "VERSION_DOWNGRADE",
+            "SCHEMA_INVALID",
             "GENESIS_MISMATCH",
             "CHAIN_HASH_MISMATCH",
             "CHAIN_LINK_BROKEN",

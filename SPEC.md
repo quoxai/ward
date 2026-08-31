@@ -60,20 +60,40 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT", "SHOULD", "S
 - Encoding **MUST** be UTF-8.
 - Storage format is implementation-defined (NDJSON, SQLite rows, etc.).
 
-### 3.2 Canonicalization (for hashing)
+### 3.2 Canonicalization profile WARD-CANON-1 (for hashing)
 
-WARD uses the same canonicalization rules as VOLT SPEC.md §3.2 to avoid divergence:
+This section normatively defines canonicalization profile **WARD-CANON-1**,
+used for every hash computed by this specification. It is defined here in
+full; its alignment with VOLT SPEC.md §3.2 is informative, and this document
+is authoritative for WARD.
 
 An implementation **MUST** produce canonical byte representations as follows:
 
-1. Serialize as JSON with:
-   - UTF-8 encoding
-   - No insignificant whitespace
-2. Object keys **MUST** be sorted lexicographically (byte-wise) at every nesting level.
-3. Numbers **MUST** be represented without exponent notation where possible, and without trailing `.0` when integral.
-4. Strings **MUST** be Unicode NFC normalized.
+1. Serialize as JSON with UTF-8 encoding and no insignificant whitespace.
+2. Object keys **MUST** be sorted lexicographically by their **UTF-8 byte
+   sequences**, compared byte by byte as unsigned values, at every nesting
+   level. (This differs from UTF-16 code-unit order for supplementary-plane
+   characters: U+E000 sorts before U+10000 in UTF-8 byte order. Sorting by a
+   language's native string comparison is NOT conformant unless it matches
+   UTF-8 byte order.)
+3. Strings **MUST** be well-formed Unicode (no unpaired surrogates) and
+   **MUST** already be in NFC. Canonicalization **MUST reject** (not repair) a
+   string that is not well-formed or not in NFC: writers store and hash the
+   identical byte sequence, so the stored form and the hashed form are
+   one-to-one, and two visually identical but differently-normalized
+   identifiers cannot silently hash to the same commitment.
+4. Integers **MUST** be within `[-(2^53 - 1), 2^53 - 1]` and serialized in
+   exact decimal form: no leading zeros, no plus sign, no fraction part, no
+   exponent. Values outside that range and non-integer numbers **MUST** be
+   rejected wherever this specification calls for an integer. (`seq` is
+   further constrained to `[1, 2^53 - 1]`.)
+5. A parser feeding canonicalization or verification **MUST** reject JSON
+   objects containing duplicate member names. Last-wins or first-wins
+   acceptance allows one byte sequence to carry two different assertions.
 
-**Reference:** See [VOLT SPEC.md §3.2](https://github.com/quoxai/volt/blob/main/SPEC.md#32-canonicalization-for-hashing) for the authoritative definition.
+Future revisions that change any of these rules will define a new named
+profile; `ward_version` binds each entry to the profile in force when it was
+written.
 
 ---
 
@@ -114,8 +134,9 @@ hash_body  = the 10 REQUIRED fields of §6.1 excluding chain_hash itself:
 chain_hash = SHA-256(canonical_json(hash_body))
 ```
 
-- `canonical_json` is the canonicalization defined in §3.2 (UTF-8, no
-  insignificant whitespace, keys sorted lexicographically, NFC strings).
+- `canonical_json` is canonicalization profile WARD-CANON-1 (§3.2).
+- The hash body **MUST** contain exactly these 10 members: no extras, none
+  absent, none null.
 - `seq` is hashed as a JSON integer, not a string.
 - OPTIONAL fields (`source_ts`, `tags`, `sig`) **MUST NOT** be included in the
   hash body. They are therefore not tamper-protected by the chain; see
@@ -135,9 +156,20 @@ Signatures are optional in v0.1 but the schema reserves fields for them.
 
 If used:
 - Signature algorithm **SHOULD** be Ed25519.
-- Public key identifiers **SHOULD** be stable (DID or key fingerprint).
+- Public key identifiers **SHOULD** be stable (DID or key fingerprint, e.g.
+  `did:key:...` or `ed25519:sha256:<first-16-hex-of-SHA-256(raw-public-key)>`).
 - Tips **SHOULD** be signed; individual entries **MAY** be signed.
 - Signing every entry is permitted but not expected (it is too expensive for most deployments).
+
+**Key resolution and trust are deployment-defined in v0.2.** This
+specification does not define a key-resolution mechanism, trust anchor, or
+issuer-authorization rule for `key_id`. A verified signature therefore proves
+possession of whichever key the deployment resolved for that `key_id`, and
+nothing more; whether that key was authorized to sign for the chain's issuer
+is a deployment policy question. Deployments **MUST** document how `key_id`
+values resolve to keys and which keys are authorized, and auditors **SHOULD**
+treat `signatures_verified` counts as meaningful only relative to that
+documented policy.
 
 ---
 
@@ -462,6 +494,20 @@ Implementations **SHOULD** configure storage to be append-only:
   mid-chain; each entry verifies under its own declared scheme, and the
   linkage rules (§14) are unchanged.
 - New chains and new entries **MUST** use the current version (`0.2`).
+- **Version monotonicity (enforceable):** within a chain, once any entry
+  declares `ward_version` `0.2`, every subsequent entry (higher `seq`)
+  **MUST** also declare `0.2` or later. A verifier **MUST** report a v0.1
+  entry that follows a v0.2 entry as BROKEN (`VERSION_DOWNGRADE`,
+  VERIFICATION.md §5). This is checkable from stored data alone and prevents
+  an attacker from appending new legacy-scheme entries to an upgraded chain.
+- **Honest limit:** for a chain that has never upgraded (all entries v0.1), a
+  verifier reading stored data cannot distinguish a legacy entry appended
+  yesterday from one appended before the upgrade; `witnessed_at` is asserted
+  by the issuer, not proven. The mitigation is the same as for any append to
+  a compromised chain: signed tips pin the head, so the exposure window is
+  the entries after the most recent externally-published tip. Deployments
+  holding v0.1 chains **SHOULD** seal them (final signed tip) and start v0.2
+  chains, rather than continuing to run mixed chains.
 - In v0.2 the `ward_version` field is part of the hash body (§4.4), so an
   entry's declared scheme is itself tamper-protected. v0.1 entries do not have
   this property; see THREAT_MODEL.md §6 (T9).
@@ -541,7 +587,9 @@ chain_hash = SHA-256(prev_chain_hash + "|" + chain_id + "|" + seq + "|" + ward_e
 This scheme is **deprecated**: because `ward_entry_id` and `source_id` carry
 no charset restriction, a crafted value containing `|` can make two distinct
 field tuples produce the same hash input (delimiter injection, THREAT_MODEL.md
-§6 T9). Verifiers **MUST** still implement it to verify existing v0.1 chains,
-**MUST NOT** accept new v0.1 entries, and **SHOULD** surface a warning (see
-VERIFICATION.md §4.2 `warnings`) when a verified chain contains v0.1 entries
-whose `ward_entry_id` or `source_id` contain the `|` character.
+§6 T9). Verifiers **MUST** still implement it to verify existing v0.1 chains.
+Writers **MUST NOT** create new v0.1 entries; a verifier enforces this to the
+extent stored data allows via the version-monotonicity rule of §16.1
+(`VERSION_DOWNGRADE`), and **SHOULD** surface a warning (see VERIFICATION.md
+§4.2 `warnings`) when a verified chain contains v0.1 entries whose
+`ward_entry_id` or `source_id` contain the `|` character.

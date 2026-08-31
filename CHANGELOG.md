@@ -44,13 +44,38 @@ This project follows a pragmatic versioning approach:
 - Chain IDs must not contain the reserved `::` sequence (SPEC.md §5.2), and
   identifier charset hygiene is documented.
 
-## [Unreleased errata, folded into 0.2.0]
+### Hardened after adversarial review (same release, 2026-08-31)
+- Canonicalization is now the self-contained, versioned profile
+  **WARD-CANON-1** (SPEC.md §3.2), no longer delegating authority to an
+  external document: key sort is explicitly UTF-8 byte order (not UTF-16
+  code-unit order), strings must be well-formed Unicode already in NFC
+  (rejected, not repaired, so stored and hashed forms are one-to-one and
+  normalization cannot alias two distinct stored identifiers), integers are
+  bounded to +/-(2^53 - 1) with exact decimal serialization, and parsers
+  must reject duplicate JSON member names.
+- New verification Step 0 (schema and well-formedness validation before any
+  hashing) with reason code `SCHEMA_INVALID`.
+- Version monotonicity rule (SPEC.md §16.1) with reason code
+  `VERSION_DOWNGRADE`: once a chain contains a v0.2 entry, any later v0.1
+  entry is BROKEN. This makes "no new legacy entries" enforceable from
+  stored data for upgraded chains; the honest limit for never-upgraded
+  chains is documented alongside the tip-based mitigation.
+- The `::` reservation and `seq` bound are now enforced in the JSON schemas
+  (chain_id pattern, WARD source_id grammar, seq maximum).
+- `key_id` resolution and trust made explicitly deployment-defined (SPEC.md
+  §4.5): a verified signature proves possession of the resolved key only.
+- tools/gen-examples.mjs hardened to the exact profile (UTF-8 byte-order
+  sort, NFC and well-formedness rejection, integer bounds). All published
+  example values were confirmed byte-identical before and after.
 
-### Errata
-- `WORKED_EXAMPLES.md` contained several hash values that were not valid 64-char lowercase hex (a 63-char genesis hash reused across Example 1, a 63-char `payload_hash` in Example 2 Entry 3, and a `tip_chain_hash` in Example 3 with non-hex characters). Fixed:
-  - Example 1's genesis hash for `ward:org/quox/env/production` is fully specified (`SHA-256("WARD-GENESIS|" + chain_id)` per §4.3) and has been recomputed correctly; the corrected value now appears consistently in Step 1, Step 2's `prev_chain_hash`, and the Step 3 `chain_hash` input string.
-  - Example 2 Entry 3's `payload_hash` and Example 3's staging tip `tip_chain_hash` reference payloads not reproduced verbatim in this doc, so they remain illustrative placeholder values; they are now valid 64-char hex and explicitly labelled illustrative.
-- No normative behavior change; this is a documentation-only patch (no `ward_version` bump required per §16.2).
+## [Historical note] Pre-0.2.0 unreleased errata (2026-07-25, superseded)
+
+Between 0.1.0 and 0.2.0 an unreleased errata pass fixed invalid hex hash
+values in `WORKED_EXAMPLES.md` and labelled the remaining unverifiable values
+as illustrative placeholders. That state is fully superseded by 0.2.0, in
+which every value in the document is real and reproducible; this note remains
+only as a record that the 0.1.0-era examples should not be trusted as
+computed values.
 
 ## [0.1.0] — 2026-03-05
 
