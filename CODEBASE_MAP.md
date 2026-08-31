@@ -141,7 +141,7 @@ A checkpoint summarizing chain state at a point in time.
 
 **4 Optional Fields:**
 - `sig` (Ed25519 signature over tip_chain_hash)
-- `key_id` (stable identifier for signing key)
+- `key_id` (stable identifier for signing key; REQUIRED when `sig` is present)
 - `sink_ref` (reference to external sink: Gitea tag URL, S3 key)
 - `notes` (human-readable annotation)
 

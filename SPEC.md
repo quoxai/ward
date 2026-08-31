@@ -397,7 +397,7 @@ Tips **SHOULD** be created:
 
 ### 12.2 Tip signing
 
-Tips **SHOULD** be signed with Ed25519. The signature is over the raw bytes of the `tip_chain_hash` hex string.
+Tips **SHOULD** be signed with Ed25519. The signature is over the raw bytes of the `tip_chain_hash` hex string. A signed tip **MUST** carry `key_id` (§8.2).
 
 ### 12.3 Tip sinks
 
