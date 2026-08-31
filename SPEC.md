@@ -98,6 +98,13 @@ An implementation **MUST** produce canonical byte representations as follows:
    objects containing duplicate member names. Last-wins or first-wins
    acceptance allows one byte sequence to carry two different assertions.
 
+Scope note for source-event payload hashing: WARD's own hash bodies contain
+no non-integer numbers, and WARD-CANON-1 deliberately defines no
+serialization for them. When a caller computes a `payload_hash` over a
+source event containing non-integer numbers, the caller **MUST** define and
+document its own canonical number form; WARD treats the resulting
+`payload_hash` as an opaque commitment either way (see §1, Payload hash).
+
 Future revisions that change any of these rules will define a new named
 profile; `ward_version` binds each entry to the profile in force when it was
 written.
