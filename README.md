@@ -1,5 +1,7 @@
 # WARD: Write-once Append-only Receipt Digests
 
+![Quox project overview](docs/assets/readme-hero.png)
+
 WARD is Quox's **witnessing layer**.
 
 It produces **tamper-evident, content-free hash-chain receipts** over events from AEE, AOCL, and VOLT, proving that specific events existed at specific points in time, without storing any event content.
