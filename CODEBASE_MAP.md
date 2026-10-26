@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-10-25 by /codebase-mirror -->
+<!-- Last verified: 2026-10-26 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-10-25
+> **Regenerated:** 2026-10-26 (no source changes since the 2026-10-25 scan; invariants re-run)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -48,7 +48,7 @@ ward/
 ├── AI_README.json            # Machine-readable summary (valid AEE envelope)
 ├── CODEBASE_MAP.md           # This file
 ├── docs/
-│   └── assets/readme-hero.png    # README hero artwork (added 2026-10-22, the only change since the last map)
+│   └── assets/readme-hero.png    # README hero artwork (added 2026-10-22)
 ├── schemas/
 │   ├── ward-entry.schema.json               # Entry (11 required + 3 optional)
 │   ├── ward-chain.schema.json               # Chain descriptor (7 required)
@@ -242,7 +242,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | AI_README.json valid AEE envelope shape | pass | envelope keys present |
 | Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan, exit 0, zero git diff |
 | Docs listed vs present | pass | README lists 10 docs plus README itself, all 11 present |
-| Failure codes in VERIFICATION.md | pass | 10 codes, matches `ward-verification-result.schema.json` enum |
+| Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `failures[].code` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design) |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
