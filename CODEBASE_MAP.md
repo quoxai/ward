@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-10-26 by /codebase-mirror -->
+<!-- Last verified: 2026-11-01 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-10-26 (no source changes since the 2026-10-25 scan; invariants re-run)
+> **Regenerated:** 2026-11-01 (no source changes since the 2026-10-26 scan; invariants re-run, two new checks added: fixture schema validation and an independent chain-hash recompute)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -18,12 +18,13 @@ The README's short version: **what** is a notary for the evidence itself (conten
 | Metric | Count |
 |--------|-------|
 | Protocol version | **0.2** (`ward_version` selects hash scheme per entry) |
-| Schema files | 4 |
+| Schema files | 4 (JSON Schema draft 2020-12) |
 | Spec docs (Markdown) | 11 |
-| Tools | 1 (`tools/gen-examples.mjs`) |
+| Tools | 1 (`tools/gen-examples.mjs`, 224 lines) |
 | Example dirs | 2 (single-chain, meta-chain), 13 generated fixture files |
 | Verification failure codes | 10 |
 | Threats modeled | 10 (T1-T5 mitigated, T6-T10 not fully) |
+| Conformance levels | 3 (WARD-W, WARD-V, WARD-T) |
 | Total files | 33 (excluding .git) |
 | License | MPL 2.0 |
 
@@ -43,7 +44,7 @@ ward/
 ├── ROADMAP.md                # v0.3 Anchoring through v1.0, explicit non-goals
 ├── SECURITY.md               # Vulnerability reporting policy
 ├── CONTRIBUTING.md           # Contribution guidelines
-├── CHANGELOG.md              # Version history (0.2.0 dated 2026-08-31)
+├── CHANGELOG.md              # Version history (0.2.0 dated 2026-08-31, 0.1.0 dated 2026-03-05)
 ├── LICENSE                   # MPL 2.0
 ├── AI_README.json            # Machine-readable summary (valid AEE envelope)
 ├── CODEBASE_MAP.md           # This file
@@ -61,7 +62,7 @@ ward/
     └── meta-chain/           # meta-chain witnessing two sub-chain tips
 ```
 
-There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft externally and back-ports its hardening here.
+There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft externally and back-ports its hardening here. No `.gitignore`, no `package.json`, no CI workflow: the generator runs on bare Node (`node:crypto`, `node:fs` only).
 
 ---
 
@@ -74,6 +75,8 @@ There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft 
 
 No test suite in the conventional sense. The conformance surface is:
 - `examples/` fixtures are generated, committed, and byte-reproducible (`node tools/gen-examples.mjs --write` must produce a clean `git status`). Verified this scan.
+- Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10, Draft 2020-12 validator: 11 objects, 0 failures).
+- Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head).
 - WORKED_EXAMPLES.md hash walkthroughs double as test vectors; the reference SDK reproduces them with independently computed values.
 - Golden conformance chains are roadmap work (v0.3).
 
@@ -134,7 +137,7 @@ Scope note: WARD-CANON-1 covers WARD's own hash bodies only (no non-integer numb
 
 **Legacy:** `ward_version` "0.1" entries used pipe-concatenation (delimiter-injectable, THREAT_MODEL T9). Preserved in SPEC Appendix A for verifying existing chains; new v0.1 entries are rejected. Version must be non-decreasing along a chain.
 
-**Signatures:** Ed25519 (SHOULD). Tips SHOULD be signed; entries MAY be. Signature is over the raw bytes of the hash hex string, base64-encoded.
+**Signatures:** Ed25519 (SHOULD). Tips SHOULD be signed; entries MAY be. Signature is over the raw bytes of the hash hex string, base64-encoded. Documentation `key_id` format: `ed25519:sha256:<first 16 hex of SHA-256(raw public key)>`.
 
 ---
 
@@ -172,7 +175,7 @@ Six-step algorithm (Steps 0-5):
 
 **Statuses:** `INTACT`, `BROKEN`, `PARTIAL`.
 
-**10 failure codes:** `SCHEMA_INVALID`, `VERSION_DOWNGRADE`, `GENESIS_MISMATCH`, `CHAIN_HASH_MISMATCH`, `CHAIN_LINK_BROKEN`, `SEQ_INVALID`, `DUPLICATE_SOURCE`, `TIP_MISMATCH`, `TIP_SIGNATURE_INVALID`, and `INCOMPLETE_CHAIN` (the only one accompanying PARTIAL rather than BROKEN). Unknown codes must be treated as BROKEN by consumers.
+**10 failure codes:** `SCHEMA_INVALID`, `VERSION_DOWNGRADE`, `GENESIS_MISMATCH`, `CHAIN_HASH_MISMATCH`, `CHAIN_LINK_BROKEN`, `SEQ_INVALID`, `DUPLICATE_SOURCE`, `TIP_MISMATCH`, `TIP_SIGNATURE_INVALID`, and `INCOMPLETE_CHAIN` (the only one accompanying PARTIAL rather than BROKEN). Unknown codes must be treated by consumers per the `status` field, never as success.
 
 **CLI exit codes:** 0 = INTACT, 1 = BROKEN, 2 = ERROR (storage/arguments), 3 = PARTIAL.
 
@@ -230,7 +233,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 
 ## Reference SDK
 
-`@quox/ward` (TypeScript/Node, zero runtime dependencies) at github.com/quoxai/ward-sdk (private, opening at launch). Chain math, full verification, Ed25519 tip signing, external anchoring, `ward-verify` CLI. Its independent implementation produced the WARD-CANON-1 scope note on caller-defined number canonicalization.
+`@quox/ward` (TypeScript/Node, zero runtime dependencies) at github.com/quoxai/ward-sdk (private, opening at launch). Chain math, full verification, Ed25519 tip signing, external anchoring, `ward-verify` CLI. README states it as v0.1 conformant with v0.2 hashing support in progress. Its independent implementation produced the WARD-CANON-1 scope note on caller-defined number canonicalization.
 
 ---
 
@@ -238,9 +241,11 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 
 | Check | Status | Details |
 |-------|--------|---------|
-| Schemas valid JSON | pass | 4/4 parse |
-| AI_README.json valid AEE envelope shape | pass | envelope keys present |
+| Schemas valid JSON | pass | 4/4 parse, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
+| AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", reason_codes list matches VERIFICATION.md |
 | Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan, exit 0, zero git diff |
+| Fixtures validate against schemas | pass | NEW: 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
+| Chain hashes recompute independently | pass | NEW: Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, and chain heads for both example chains |
 | Docs listed vs present | pass | README lists 10 docs plus README itself, all 11 present |
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `failures[].code` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design) |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
