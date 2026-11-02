@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-01 by /codebase-mirror -->
+<!-- Last verified: 2026-11-02 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-01 (no source changes since the 2026-10-26 scan; invariants re-run, two new checks added: fixture schema validation and an independent chain-hash recompute)
+> **Regenerated:** 2026-11-02 (no source changes since the 2026-11-01 scan; all 10 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -75,8 +75,8 @@ There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft 
 
 No test suite in the conventional sense. The conformance surface is:
 - `examples/` fixtures are generated, committed, and byte-reproducible (`node tools/gen-examples.mjs --write` must produce a clean `git status`). Verified this scan.
-- Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10, Draft 2020-12 validator: 11 objects, 0 failures).
-- Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head).
+- Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10.3, Draft 2020-12 validator: 11 objects, 0 failures). Note for future scans: `meta-chain/sub-chain-tips.json` and `single-chain/source-events.json` are objects keyed by ID, not arrays; iterate their values.
+- Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head, tip matches its entry).
 - WORKED_EXAMPLES.md hash walkthroughs double as test vectors; the reference SDK reproduces them with independently computed values.
 - Golden conformance chains are roadmap work (v0.3).
 
@@ -115,6 +115,10 @@ Uniqueness: `UNIQUE(chain_id, source_kind, source_id)`, no double-witnessing wit
 
 6 required: `tip_id`, `chain_id`, `tip_seq`, `tip_chain_hash`, `entry_count`, `created_at`.
 4 optional: `sig`, `key_id` (**REQUIRED whenever `sig` is present**, stated in §8.2 and §12.2; key_id trust resolution is deployment-defined in v0.2, normative model is roadmap v0.5), `sink_ref`, `notes`.
+
+### Verification Result (VERIFICATION.md §5)
+
+`status` is the only top-level required field. The schema is a `oneOf` over three branches: `INTACT` (optional counts, head hash, `warnings[]`), `BROKEN` (requires `reason` from the 9-code enum plus free-form `details`), and `PARTIAL` (requires `reason`, standard code `INCOMPLETE_CHAIN`, enum left open by design).
 
 ---
 
@@ -177,7 +181,7 @@ Six-step algorithm (Steps 0-5):
 
 **10 failure codes:** `SCHEMA_INVALID`, `VERSION_DOWNGRADE`, `GENESIS_MISMATCH`, `CHAIN_HASH_MISMATCH`, `CHAIN_LINK_BROKEN`, `SEQ_INVALID`, `DUPLICATE_SOURCE`, `TIP_MISMATCH`, `TIP_SIGNATURE_INVALID`, and `INCOMPLETE_CHAIN` (the only one accompanying PARTIAL rather than BROKEN). Unknown codes must be treated by consumers per the `status` field, never as success.
 
-**CLI exit codes:** 0 = INTACT, 1 = BROKEN, 2 = ERROR (storage/arguments), 3 = PARTIAL.
+**CLI exit codes (VERIFICATION.md §6):** 0 = INTACT, 1 = BROKEN, 2 = ERROR (storage not readable, invalid arguments), 3 = PARTIAL.
 
 ---
 
@@ -242,12 +246,13 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Check | Status | Details |
 |-------|--------|---------|
 | Schemas valid JSON | pass | 4/4 parse, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
-| AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", reason_codes list matches VERIFICATION.md |
-| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan, exit 0, zero git diff |
-| Fixtures validate against schemas | pass | NEW: 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
-| Chain hashes recompute independently | pass | NEW: Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, and chain heads for both example chains |
+| AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", 10 reason_codes match VERIFICATION.md |
+| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, zero git diff |
+| Fixtures validate against schemas | pass | 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
+| Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; single-chain tip matches entry 3 and carries `sig` + `key_id` |
 | Docs listed vs present | pass | README lists 10 docs plus README itself, all 11 present |
-| Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `failures[].code` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design) |
+| Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
+| Source drift since last map | pass | `git diff 20a368f -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-01 scan |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
