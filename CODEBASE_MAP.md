@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-02 by /codebase-mirror -->
+<!-- Last verified: 2026-11-03 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-02 (no source changes since the 2026-11-01 scan; all 10 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass)
+> **Regenerated:** 2026-11-03 (no source changes since the 2026-11-01 scan; all 10 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -21,7 +21,7 @@ The README's short version: **what** is a notary for the evidence itself (conten
 | Schema files | 4 (JSON Schema draft 2020-12) |
 | Spec docs (Markdown) | 11 |
 | Tools | 1 (`tools/gen-examples.mjs`, 224 lines) |
-| Example dirs | 2 (single-chain, meta-chain), 13 generated fixture files |
+| Example dirs | 2 (single-chain, meta-chain), 11 generated JSON fixtures plus 2 `.gitkeep` |
 | Verification failure codes | 10 |
 | Threats modeled | 10 (T1-T5 mitigated, T6-T10 not fully) |
 | Conformance levels | 3 (WARD-W, WARD-V, WARD-T) |
@@ -254,5 +254,5 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff 20a368f -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-01 scan |
+| Source drift since last map | pass | `git diff e8883bf -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-02 scan (and none since 2026-11-01) |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
