@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-03 by /codebase-mirror -->
+<!-- Last verified: 2026-11-04 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-03 (no source changes since the 2026-11-01 scan; all 10 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass)
+> **Regenerated:** 2026-11-04 (no source changes since the 2026-11-01 scan; all 11 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass; this scan adds an independent Python Ed25519 signature check and corrects the license, which has been Apache 2.0 since 2026-03-06, not MPL 2.0 as earlier maps stated)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -26,7 +26,7 @@ The README's short version: **what** is a notary for the evidence itself (conten
 | Threats modeled | 10 (T1-T5 mitigated, T6-T10 not fully) |
 | Conformance levels | 3 (WARD-W, WARD-V, WARD-T) |
 | Total files | 33 (excluding .git) |
-| License | MPL 2.0 |
+| License | Apache 2.0 (LICENSE file; switched from MPL on 2026-03-06, commit 5eb35a7) |
 
 ---
 
@@ -45,7 +45,7 @@ ward/
 ├── SECURITY.md               # Vulnerability reporting policy
 ├── CONTRIBUTING.md           # Contribution guidelines
 ├── CHANGELOG.md              # Version history (0.2.0 dated 2026-08-31, 0.1.0 dated 2026-03-05)
-├── LICENSE                   # MPL 2.0
+├── LICENSE                   # Apache License 2.0
 ├── AI_README.json            # Machine-readable summary (valid AEE envelope)
 ├── CODEBASE_MAP.md           # This file
 ├── docs/
@@ -76,7 +76,8 @@ There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft 
 No test suite in the conventional sense. The conformance surface is:
 - `examples/` fixtures are generated, committed, and byte-reproducible (`node tools/gen-examples.mjs --write` must produce a clean `git status`). Verified this scan.
 - Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10.3, Draft 2020-12 validator: 11 objects, 0 failures). Note for future scans: `meta-chain/sub-chain-tips.json` and `single-chain/source-events.json` are objects keyed by ID, not arrays; iterate their values.
-- Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head, tip matches its entry).
+- Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head, every `payload_hash` recomputed from its source event or sub-chain tip, tip matches its entry).
+- Tip signatures verify independently: Python `cryptography` derives the documentation key from the published seed, reproduces the `key_id`, and verifies all 3 tip signatures (checked this scan; the Node generator also self-verifies).
 - WORKED_EXAMPLES.md hash walkthroughs double as test vectors; the reference SDK reproduces them with independently computed values.
 - Golden conformance chains are roadmap work (v0.3).
 
@@ -245,14 +246,16 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 
 | Check | Status | Details |
 |-------|--------|---------|
-| Schemas valid JSON | pass | 4/4 parse, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
+| Schemas valid JSON | pass | 4/4 parse and pass `check_schema`, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
 | AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", 10 reason_codes match VERIFICATION.md |
-| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, zero git diff |
+| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, 11 files rewritten, zero git diff |
 | Fixtures validate against schemas | pass | 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
-| Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; single-chain tip matches entry 3 and carries `sig` + `key_id` |
+| Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; all 5 `payload_hash` values recompute from the committed source events and sub-chain tips; single-chain tip matches entry 3 |
+| Tip signatures verify independently | pass | Python `cryptography` derives the Ed25519 key from SHA-256("WARD-EXAMPLE-KEY-v0.2"), reproduces `key_id` `ed25519:sha256:765fe10404e81eb5`, verifies 3/3 tip signatures over the hash hex bytes |
 | Docs listed vs present | pass | README lists 10 docs plus README itself, all 11 present |
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff e8883bf -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-02 scan (and none since 2026-11-01) |
+| Source drift since last map | pass | `git diff 6f2bc62 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-03 scan (and none since 2026-11-01) |
+| License file matches map | corrected | LICENSE is Apache License 2.0 (commit 5eb35a7, 2026-03-06). Maps up to 2026-11-03 said MPL 2.0; fixed this scan. CONTRIBUTING.md defers to the LICENSE file and names no license, so no other doc is stale |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
