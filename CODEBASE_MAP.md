@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-04 by /codebase-mirror -->
+<!-- Last verified: 2026-11-05 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-04 (no source changes since the 2026-11-01 scan; all 11 invariants re-run on Node 20.20.2 and Python jsonschema 4.10.3, all pass; this scan adds an independent Python Ed25519 signature check and corrects the license, which has been Apache 2.0 since 2026-03-06, not MPL 2.0 as earlier maps stated)
+> **Regenerated:** 2026-11-05 (no source changes since the 2026-11-01 scan; all 11 invariants re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography`, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -119,7 +119,7 @@ Uniqueness: `UNIQUE(chain_id, source_kind, source_id)`, no double-witnessing wit
 
 ### Verification Result (VERIFICATION.md §5)
 
-`status` is the only top-level required field. The schema is a `oneOf` over three branches: `INTACT` (optional counts, head hash, `warnings[]`), `BROKEN` (requires `reason` from the 9-code enum plus free-form `details`), and `PARTIAL` (requires `reason`, standard code `INCOMPLETE_CHAIN`, enum left open by design).
+`status` is the only top-level required field. The schema is a `oneOf` over three branches: `INTACT` (optional counts, head hash, `warnings[]`), `BROKEN` (requires `reason` from the 9-code enum; free-form `details` and `chain_id` optional), and `PARTIAL` (requires `reason`, standard code `INCOMPLETE_CHAIN`, enum left open by design).
 
 ---
 
@@ -248,7 +248,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 |-------|--------|---------|
 | Schemas valid JSON | pass | 4/4 parse and pass `check_schema`, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
 | AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", 10 reason_codes match VERIFICATION.md |
-| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, 11 files rewritten, zero git diff |
+| Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, 11 files rewritten, `git status --porcelain` empty |
 | Fixtures validate against schemas | pass | 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
 | Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; all 5 `payload_hash` values recompute from the committed source events and sub-chain tips; single-chain tip matches entry 3 |
 | Tip signatures verify independently | pass | Python `cryptography` derives the Ed25519 key from SHA-256("WARD-EXAMPLE-KEY-v0.2"), reproduces `key_id` `ed25519:sha256:765fe10404e81eb5`, verifies 3/3 tip signatures over the hash hex bytes |
@@ -256,6 +256,6 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff 6f2bc62 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-03 scan (and none since 2026-11-01) |
-| License file matches map | corrected | LICENSE is Apache License 2.0 (commit 5eb35a7, 2026-03-06). Maps up to 2026-11-03 said MPL 2.0; fixed this scan. CONTRIBUTING.md defers to the LICENSE file and names no license, so no other doc is stale |
+| Source drift since last map | pass | `git diff 7b85e57 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-04 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork) |
+| License file matches map | pass | LICENSE header is Apache License 2.0 (commit 5eb35a7, 2026-03-06); map has said so since the 2026-11-04 scan. CONTRIBUTING.md defers to the LICENSE file and names no license |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
