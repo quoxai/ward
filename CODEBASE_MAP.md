@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-05 by /codebase-mirror -->
+<!-- Last verified: 2026-11-06 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-05 (no source changes since the 2026-11-01 scan; all 11 invariants re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography`, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified)
+> **Regenerated:** 2026-11-06 (no source changes since the 2026-11-01 scan; all 13 checks re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography` 41.0.7, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified, every hash quoted in WORKED_EXAMPLES.md traced to a fixture or to generator output)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -78,7 +78,7 @@ No test suite in the conventional sense. The conformance surface is:
 - Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10.3, Draft 2020-12 validator: 11 objects, 0 failures). Note for future scans: `meta-chain/sub-chain-tips.json` and `single-chain/source-events.json` are objects keyed by ID, not arrays; iterate their values.
 - Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head, every `payload_hash` recomputed from its source event or sub-chain tip, tip matches its entry).
 - Tip signatures verify independently: Python `cryptography` derives the documentation key from the published seed, reproduces the `key_id`, and verifies all 3 tip signatures (checked this scan; the Node generator also self-verifies).
-- WORKED_EXAMPLES.md hash walkthroughs double as test vectors; the reference SDK reproduces them with independently computed values.
+- WORKED_EXAMPLES.md hash walkthroughs double as test vectors; the reference SDK reproduces them with independently computed values. Note for future scans: the walkthrough opens on the `ward:org/quox/env/production` chain (genesis, one entry, one tip) which is NOT written to `examples/`; the generator prints its hashes to stdout only. The committed `single-chain` fixture is the staging chain. The tamper example at the end quotes the pre-tamper staging entry-2 hash (also stdout only) and an all-zeros `payload_hash` as the illustrative tampered input (checked this scan: 18 of 19 doc hashes trace to a fixture or generator stdout, the 19th is that zero placeholder).
 - Golden conformance chains are roadmap work (v0.3).
 
 ---
@@ -252,10 +252,11 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Fixtures validate against schemas | pass | 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
 | Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; all 5 `payload_hash` values recompute from the committed source events and sub-chain tips; single-chain tip matches entry 3 |
 | Tip signatures verify independently | pass | Python `cryptography` derives the Ed25519 key from SHA-256("WARD-EXAMPLE-KEY-v0.2"), reproduces `key_id` `ed25519:sha256:765fe10404e81eb5`, verifies 3/3 tip signatures over the hash hex bytes |
+| WORKED_EXAMPLES hashes reproducible | pass | 19 distinct SHA-256 values and 2 Ed25519 signatures quoted in WORKED_EXAMPLES.md: 15 hashes and both signatures appear verbatim in `examples/`, 3 hashes (production-chain genesis `4228bb65…`, its entry payload `eead9b7e…`, pre-tamper staging entry-2 `2bd0be85…`) appear in `node tools/gen-examples.mjs` stdout, 1 is the all-zeros tamper placeholder. Meta-chain `source_id` values parse as `<sub_chain_id>::<tip_seq>` and resolve to a committed sub-chain tip (2/2) |
 | Docs listed vs present | pass | README lists 10 docs plus README itself, all 11 present |
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff 7b85e57 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-04 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork) |
+| Source drift since last map | pass | `git diff cfd7b05 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-05 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork) |
 | License file matches map | pass | LICENSE header is Apache License 2.0 (commit 5eb35a7, 2026-03-06); map has said so since the 2026-11-04 scan. CONTRIBUTING.md defers to the LICENSE file and names no license |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
