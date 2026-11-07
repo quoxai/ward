@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-06 by /codebase-mirror -->
+<!-- Last verified: 2026-11-07 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-06 (no source changes since the 2026-11-01 scan; all 13 checks re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography` 41.0.7, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified, every hash quoted in WORKED_EXAMPLES.md traced to a fixture or to generator output)
+> **Regenerated:** 2026-11-07 (no source changes since the 2026-11-01 scan; all 14 checks re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography` 41.0.7, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified, every hash quoted in WORKED_EXAMPLES.md traced to a fixture or to generator output, version 0.2 stated consistently across CHANGELOG, SPEC, README, AI_README and fixtures)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -257,6 +257,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff cfd7b05 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-05 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork) |
+| Source drift since last map | pass | `git diff 0a95a82 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-06 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork, 2026-10-22) |
 | License file matches map | pass | LICENSE header is Apache License 2.0 (commit 5eb35a7, 2026-03-06); map has said so since the 2026-11-04 scan. CONTRIBUTING.md defers to the LICENSE file and names no license |
+| Version statements agree | pass | CHANGELOG top entry `[0.2.0] - 2026-08-31`, SPEC §16 says new entries MUST use `0.2`, README says WARD v0.2 (draft), AI_README payload version `0.2`, all 5 fixture entries carry `ward_version` `0.2`; SPEC front matter still reads `Status: Draft`, consistent with README. Added this scan |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
