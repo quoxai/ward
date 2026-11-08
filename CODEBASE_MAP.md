@@ -1,8 +1,8 @@
-<!-- Last verified: 2026-11-07 by /codebase-mirror -->
+<!-- Last verified: 2026-11-08 by /codebase-mirror -->
 
 # WARD: Codebase Map
 
-> **Regenerated:** 2026-11-07 (no source changes since the 2026-11-01 scan; all 14 checks re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography` 41.0.7, all pass: fixtures byte-reproducible, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified, every hash quoted in WORKED_EXAMPLES.md traced to a fixture or to generator output, version 0.2 stated consistently across CHANGELOG, SPEC, README, AI_README and fixtures)
+> **Regenerated:** 2026-11-08 (no source changes since the 2026-11-01 scan; all 15 checks re-run this scan on Node 20.20.2 and Python jsonschema 4.10.3 plus `cryptography` 41.0.7, all pass: fixtures byte-reproducible under `--write`, 11/11 fixtures schema-valid, both chains INTACT by independent recompute, 3/3 tip signatures verified, every hash quoted in WORKED_EXAMPLES.md traced to a fixture or to generator output, version 0.2 stated consistently across CHANGELOG, SPEC, README, AI_README and fixtures, and AI_README.json now validated against the real AEE v1 envelope schema from the sibling aee repo rather than by key-shape inspection)
 > **Protocol Version:** 0.2 (SHIPPED 2026-08-31; "0.1" legacy verify-only via SPEC Appendix A)
 
 ## Overview
@@ -74,7 +74,7 @@ There is no IETF draft XML in this repo; the IETF-01 stream maintains the draft 
 ## Test Structure
 
 No test suite in the conventional sense. The conformance surface is:
-- `examples/` fixtures are generated, committed, and byte-reproducible (`node tools/gen-examples.mjs --write` must produce a clean `git status`). Verified this scan.
+- `examples/` fixtures are generated, committed, and byte-reproducible (`node tools/gen-examples.mjs --write` must produce a clean `git status`). Verified this scan. Note for future scans: the `--write` flag is the whole test. Without it the generator only prints, so diffing `examples/` before and after proves nothing (a scan on 2026-11-08 nearly reported a vacuous pass this way); check `git status --porcelain` after a `--write` run.
 - Every fixture validates against its schema (checked this scan with Python `jsonschema` 4.10.3, Draft 2020-12 validator: 11 objects, 0 failures). Note for future scans: `meta-chain/sub-chain-tips.json` and `single-chain/source-events.json` are objects keyed by ID, not arrays; iterate their values.
 - Chain hashes recompute from an independent Python implementation of WARD-CANON-1 (checked this scan: both example chains INTACT, genesis through head, every `payload_hash` recomputed from its source event or sub-chain tip, tip matches its entry).
 - Tip signatures verify independently: Python `cryptography` derives the documentation key from the published seed, reproduces the `key_id`, and verifies all 3 tip signatures (checked this scan; the Node generator also self-verifies).
@@ -247,7 +247,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Check | Status | Details |
 |-------|--------|---------|
 | Schemas valid JSON | pass | 4/4 parse and pass `check_schema`, all declare draft 2020-12 and a `$id` under github.com/quoxai/ward/schemas |
-| AI_README.json valid AEE envelope shape | pass | envelope keys present, payload version "0.2", 10 reason_codes match VERIFICATION.md |
+| AI_README.json valid AEE v1 envelope | pass | validates with 0 errors against `schemas/aee-v1.schema.json` in the sibling aee repo (`/home/control/repos/aee`, commit 04826d9, 10 required envelope keys: v, id, ts, type, from, to, intent, corr, priority, payload); payload version "0.2", 10 reason_codes match VERIFICATION.md. Until this scan the check only inspected key shape; the aee repo's own AI_README.json validates against the same schema as a control |
 | Fixtures reproducible | pass | `node tools/gen-examples.mjs --write` run this scan on Node 20.20.2, exit 0, 11 files rewritten, `git status --porcelain` empty |
 | Fixtures validate against schemas | pass | 5 entries, 2 chains, 3 tips, 1 verification result against the Draft 2020-12 validator, 0 errors |
 | Chain hashes recompute independently | pass | Python reimplementation of WARD-CANON-1 reproduces genesis, every `chain_hash`, chain heads and seq contiguity for both example chains; all 5 `payload_hash` values recompute from the committed source events and sub-chain tips; single-chain tip matches entry 3 |
@@ -257,7 +257,7 @@ Explicit non-goals: distributed consensus, content storage, real-time querying, 
 | Failure codes in VERIFICATION.md | pass | 10 codes: 9 in the BROKEN `reason` enum of `ward-verification-result.schema.json`, plus `INCOMPLETE_CHAIN` named in the PARTIAL reason description (open-ended by design); doc, schema and AI_README agree |
 | Threats in THREAT_MODEL.md | pass | T1-T10 headings present |
 | Schema required fields | pass | entry 11, chain 7, tip 6, result 1 (`status`), matches SPEC §6-§8 |
-| Source drift since last map | pass | `git diff 0a95a82 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-06 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork, 2026-10-22) |
+| Source drift since last map | pass | `git diff 8525bf9 -- . ':!CODEBASE_MAP.md'` is empty: no source, schema, doc or fixture change since the 2026-11-07 scan (and none since 2026-11-01; last source commit is 9449c6e, the README hero artwork, 2026-10-22) |
 | License file matches map | pass | LICENSE header is Apache License 2.0 (commit 5eb35a7, 2026-03-06); map has said so since the 2026-11-04 scan. CONTRIBUTING.md defers to the LICENSE file and names no license |
-| Version statements agree | pass | CHANGELOG top entry `[0.2.0] - 2026-08-31`, SPEC §16 says new entries MUST use `0.2`, README says WARD v0.2 (draft), AI_README payload version `0.2`, all 5 fixture entries carry `ward_version` `0.2`; SPEC front matter still reads `Status: Draft`, consistent with README. Added this scan |
+| Version statements agree | pass | CHANGELOG top entry `[0.2.0] - 2026-08-31`, SPEC §16 says new entries MUST use `0.2`, README says WARD v0.2 (draft), AI_README payload version `0.2`, all 5 fixture entries carry `ward_version` `0.2`; SPEC front matter still reads `Status: Draft`, consistent with README |
 | IETF draft | note | no draft-*.xml in repo, maintained externally by IETF-01 stream |
